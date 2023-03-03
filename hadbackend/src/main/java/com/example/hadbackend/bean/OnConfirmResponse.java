@@ -7,13 +7,14 @@ public class OnConfirmResponse {
     private String requestId;
     private String timestamp;
     private ConfirmAuth auth;
-    private OnConfirmPatient patient;
+    private Err error;
+    private Resp resp;
 
     public String getRequestid(){
         return this.requestId;
     }
-
-    public OnConfirmPatient getPatient(){
-        return this.patient;
+    public ConfirmAuth getAuth(){
+        return this.auth;
     }
+
 }

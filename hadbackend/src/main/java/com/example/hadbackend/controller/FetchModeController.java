@@ -26,12 +26,13 @@ public class FetchModeController {
 
 
     WebClient webClient=WebClient.create();
-    String token = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE2Nzc0MzgwNDMsImlhdCI6MTY3NzQzNzQ0MywianRpIjoiMWZlNGEyYzMtYmI5Ni00Mzk1LTllZGEtYTNiNDdmMWIwOTZlIiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJmYmMzNjA5ZC0yNjAzLTQ4MjUtYjcxMi1hMzk5MTVlYTI0OTEiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhfMDAyNzU3Iiwic2Vzc2lvbl9zdGF0ZSI6ImM1M2VkMjEwLTM5MzMtNDgxNy05NzgxLTRiZDExMjMzNTE0NyIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovL2xvY2FsaG9zdDo5MDA3Il0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJoaXUiLCJvZmZsaW5lX2FjY2VzcyIsImhlYWx0aElkIiwiT0lEQyIsImhpcCJdfSwicmVzb3VyY2VfYWNjZXNzIjp7IlNCWF8wMDI3NTciOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJjbGllbnRIb3N0IjoiMTAuMjMzLjY5LjE5OCIsImNsaWVudElkIjoiU0JYXzAwMjc1NyIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoic2VydmljZS1hY2NvdW50LXNieF8wMDI3NTciLCJjbGllbnRBZGRyZXNzIjoiMTAuMjMzLjY5LjE5OCJ9.QGDXwUPbrcetOzt5xRR37eAga8pVJqIG4U_7QBjm-LSs11UBtv6kMQrYmNr0pDrA6TrRfPLATwLT7Jxxvl_hQ_eSjJ8_DDtPNYKMukHCEf0IwtgyydFL4jgXMeuCSQ4YWRmjdA1NPD9GRoKvEaxM9BeYErPmRCOWIrOmWYub2GtPcH3s4ISkekiCqcC6uxnbZ3nrgk76Yd7RZ4SrgJU5osEMRepX3XQmy6vGwoe9lzbtxAvBgo0uOo1t42fy6DTcRw-Mjy3bmDi5-coDEO3h_jxqIfKW8IKZLlSMyBEbVj7op5DRXfnX7wLl6nj09fUl8tk0h4gCAmgdwH405Z_gOQ";
+    String token = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE2Nzc4Njk0OTgsImlhdCI6MTY3Nzg2ODg5OCwianRpIjoiZWQ1ZWMwZjctN2E5ZS00MDg1LWI3NjEtNjQyODM1MTVkYWQxIiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJmYmMzNjA5ZC0yNjAzLTQ4MjUtYjcxMi1hMzk5MTVlYTI0OTEiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhfMDAyNzU3Iiwic2Vzc2lvbl9zdGF0ZSI6ImQxNzM5ZDBiLWRjY2YtNGZmMC1iZDczLWE4ZjcxMzA4MjhhNSIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovL2xvY2FsaG9zdDo5MDA3Il0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJoaXUiLCJvZmZsaW5lX2FjY2VzcyIsImhlYWx0aElkIiwiT0lEQyIsImhpcCJdfSwicmVzb3VyY2VfYWNjZXNzIjp7IlNCWF8wMDI3NTciOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJjbGllbnRIb3N0IjoiMTAuMjMzLjY3LjIzNyIsImNsaWVudElkIjoiU0JYXzAwMjc1NyIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoic2VydmljZS1hY2NvdW50LXNieF8wMDI3NTciLCJjbGllbnRBZGRyZXNzIjoiMTAuMjMzLjY3LjIzNyJ9.f5XRujNjojlLbX34LSBC_L52XQKFbwrltkCzSyqiKLJuoxLD6H3oHrkVr96ICpyVJLdPQ7_6-_NkoAgG95q3mNUK0tRI9OHGUt9wEbkOp-_RFv1FKXwNXY8pWceO7AzShDWz4pTwS98ciQFH36Ro444WLcqsUX-4VGYxDr6yMMNlHgppdCu2uUGYrxMIIj9cjHxmiBYoEbJWRSyfot9FhTKBqLZoV76DTWO9yrZ3o-gsnXZpIFE4AgXAIoiAUlOZlJ351hWuhZIoRfeBr8v_mPd9jN5MXA9PjDZDwdsVEV4CaZevqMrfcftt_zAltN0y01bYZpfoG2JNQBLV6vCMbQ";
     //Callback
     String abhaid;
 
     String transactionid;
 
+    OnConfirmPatient patient;
     @PostMapping("/v0.5/users/auth/on-fetch-modes")
     @CrossOrigin(origins = "*")
     public void Fetchcallback(@RequestBody FetchMode root){
@@ -48,9 +49,10 @@ public class FetchModeController {
     @PostMapping("/v0.5/users/auth/on-confirm")
     public void Confirmcallback(@RequestBody OnConfirmResponse root){
         System.out.println(root.getRequestid());
-        System.out.println(root.getPatient().getName());
-        System.out.println(root.getPatient().getAddress().getState());
-        System.out.println(root.getPatient().getIdentifiers().getValue());
+        System.out.println(root.getAuth().getPatient().getName());
+        System.out.println(root.getAuth().getPatient().getAddress().getState());
+        patient=root.getAuth().getPatient();
+        //System.out.println(root.getAuth().getPatient().getIdentifiersArrayList().get(0).getValue());
     }
 
 
@@ -112,7 +114,7 @@ public class FetchModeController {
                 .header(HttpHeaders.AUTHORIZATION,token)
                 .header("X-CM-ID","sbx")
                 .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
-                .body(Mono.just(fetchModeRequest),FetchModeRequest.class)
+                 .body(Mono.just(fetchModeRequest),FetchModeRequest.class)
                 .retrieve().bodyToMono(Object.class);
 
         Mono<Object> res1=OTP();
@@ -250,6 +252,11 @@ public class FetchModeController {
                 .body(Mono.just(authInitRequest), OnConfirmRequest.class)
                 .retrieve().bodyToMono(Object.class);
         return res;
+    }
+
+    @GetMapping("/getpatientdata")
+    public OnConfirmPatient getPatientdata(){
+        return patient;
     }
 //    public void fectchmodabdm(@RequestBody FetchModeRequest root){
 //    }.
