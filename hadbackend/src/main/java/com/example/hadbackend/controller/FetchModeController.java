@@ -18,6 +18,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -26,17 +27,21 @@ public class FetchModeController {
 
 
     WebClient webClient=WebClient.create();
-    String token = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE2Nzc4Njk0OTgsImlhdCI6MTY3Nzg2ODg5OCwianRpIjoiZWQ1ZWMwZjctN2E5ZS00MDg1LWI3NjEtNjQyODM1MTVkYWQxIiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJmYmMzNjA5ZC0yNjAzLTQ4MjUtYjcxMi1hMzk5MTVlYTI0OTEiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhfMDAyNzU3Iiwic2Vzc2lvbl9zdGF0ZSI6ImQxNzM5ZDBiLWRjY2YtNGZmMC1iZDczLWE4ZjcxMzA4MjhhNSIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovL2xvY2FsaG9zdDo5MDA3Il0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJoaXUiLCJvZmZsaW5lX2FjY2VzcyIsImhlYWx0aElkIiwiT0lEQyIsImhpcCJdfSwicmVzb3VyY2VfYWNjZXNzIjp7IlNCWF8wMDI3NTciOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJjbGllbnRIb3N0IjoiMTAuMjMzLjY3LjIzNyIsImNsaWVudElkIjoiU0JYXzAwMjc1NyIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoic2VydmljZS1hY2NvdW50LXNieF8wMDI3NTciLCJjbGllbnRBZGRyZXNzIjoiMTAuMjMzLjY3LjIzNyJ9.f5XRujNjojlLbX34LSBC_L52XQKFbwrltkCzSyqiKLJuoxLD6H3oHrkVr96ICpyVJLdPQ7_6-_NkoAgG95q3mNUK0tRI9OHGUt9wEbkOp-_RFv1FKXwNXY8pWceO7AzShDWz4pTwS98ciQFH36Ro444WLcqsUX-4VGYxDr6yMMNlHgppdCu2uUGYrxMIIj9cjHxmiBYoEbJWRSyfot9FhTKBqLZoV76DTWO9yrZ3o-gsnXZpIFE4AgXAIoiAUlOZlJ351hWuhZIoRfeBr8v_mPd9jN5MXA9PjDZDwdsVEV4CaZevqMrfcftt_zAltN0y01bYZpfoG2JNQBLV6vCMbQ";
+    String token;
     //Callback
     String abhaid;
 
     String transactionid;
 
+    SessionResponse sessionResponse;
+
+    FetchMode fetchMode;
     OnConfirmPatient patient;
     @PostMapping("/v0.5/users/auth/on-fetch-modes")
     @CrossOrigin(origins = "*")
     public void Fetchcallback(@RequestBody FetchMode root){
         System.out.println(root.getRequestId());
+        fetchMode=root;
     }
 
     @PostMapping("/v0.5/users/auth/on-init")
@@ -48,9 +53,9 @@ public class FetchModeController {
 
     @PostMapping("/v0.5/users/auth/on-confirm")
     public void Confirmcallback(@RequestBody OnConfirmResponse root){
-        System.out.println(root.getRequestid());
-        System.out.println(root.getAuth().getPatient().getName());
-        System.out.println(root.getAuth().getPatient().getAddress().getState());
+//        System.out.println(root.getRequestid());
+//        System.out.println(root.getAuth().getPatient().getName());
+//        System.out.println(root.getAuth().getPatient().getAddress().getState());
         patient=root.getAuth().getPatient();
         //System.out.println(root.getAuth().getPatient().getIdentifiersArrayList().get(0).getValue());
     }
@@ -61,19 +66,21 @@ public class FetchModeController {
     @PostMapping("/session")
     public void getsession(){
         SessionRequest sessiontoken=new SessionRequest();
-        sessiontoken.setClientId("SBX_002757");
-        sessiontoken.setClientsecret("e5744b75-8089-47bf-a810-8bf604c39939");
+        sessiontoken.setClientId("SBX_002859");
+        sessiontoken.setClientsecret("7fd0134e-9311-41b5-a378-02d743f9f3b0");
 
-        SessionResponse token_res = (SessionResponse) webClient.post()
+        SessionResponse token_res = webClient.post()
                 .uri("https://dev.abdm.gov.in/gateway/v0.5/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(sessiontoken),SessionRequest.class)
-                .retrieve().bodyToMono(Object.class).block();
+                .retrieve().bodyToMono(SessionResponse.class).block();
+        sessionResponse = token_res;
+        token="Bearer "+sessionResponse.getAccesstoken();
+        //System.out.println(sessionResponse.getAccesstoken());
     }
 
     @PostMapping("/fetchdetails")
     public Mono<Object> fetchmodeABHA(@RequestParam String id) {
-
-
         abhaid=id;
         FetchModeRequest fetchModeRequest =new FetchModeRequest();
         UUID uuid = UUID.randomUUID();
@@ -93,7 +100,7 @@ public class FetchModeController {
         newQuery.setPurpose("KYC_AND_LINK");
 
         Requester requester=new Requester();
-        requester.setId("demo-hip-6");
+        requester.setId("iiitbteam18");
         requester.setType("HIP");
 
         newQuery.setRequester(requester);
@@ -116,38 +123,41 @@ public class FetchModeController {
                 .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
                  .body(Mono.just(fetchModeRequest),FetchModeRequest.class)
                 .retrieve().bodyToMono(Object.class);
+        return res;
+    }
 
-        Mono<Object> res1=OTP();
-        System.out.println("outofinit");
-        return res1;
+    @GetMapping("/getmodes")
+    public List<String> getModes(){
+        System.out.println("getmodes"+ fetchMode.getAuth().getModes().get(0));
+        return fetchMode.getAuth().getModes();
     }
 
    // ,@RequestParam String id
 
-    @PostMapping("/fetch")
-    public Mono<Object> fetchmodeABHA(@RequestHeader(HttpHeaders.AUTHORIZATION) String token, @RequestBody FetchModeRequest fetchModeRequest1) {
+//    @PostMapping("/fetch")
+//    public Mono<Object> fetchmodeABHA(@RequestHeader(HttpHeaders.AUTHORIZATION) String token, @RequestBody FetchModeRequest fetchModeRequest1) {
+//
+//        System.out.println(fetchModeRequest1.getRequestId());
+//        System.out.println(fetchModeRequest1.getTimestamp());
+//        System.out.println(fetchModeRequest1.getQuery().getId());
+//        System.out.println(fetchModeRequest1.getQuery().getPurpose());
+//        System.out.println(fetchModeRequest1.getQuery().getRequester().getId());
+//        System.out.println(fetchModeRequest1.getQuery().getRequester().getType());
+//        System.out.println(token);
+//
+//
+//        Mono<Object> res = webClient.post()
+//                .uri("https://dev.abdm.gov.in/gateway/v0.5/users/auth/fetch-modes")
+//                .header(HttpHeaders.AUTHORIZATION,token)
+//                .header("X-CM-ID","sbx")
+//                .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
+//                .body(Mono.just(fetchModeRequest1),FetchModeRequest.class)
+//                .retrieve().bodyToMono(Object.class);
+//        return res;
+//    }
 
-        System.out.println(fetchModeRequest1.getRequestId());
-        System.out.println(fetchModeRequest1.getTimestamp());
-        System.out.println(fetchModeRequest1.getQuery().getId());
-        System.out.println(fetchModeRequest1.getQuery().getPurpose());
-        System.out.println(fetchModeRequest1.getQuery().getRequester().getId());
-        System.out.println(fetchModeRequest1.getQuery().getRequester().getType());
-        System.out.println(token);
-
-
-        Mono<Object> res = webClient.post()
-                .uri("https://dev.abdm.gov.in/gateway/v0.5/users/auth/fetch-modes")
-                .header(HttpHeaders.AUTHORIZATION,token)
-                .header("X-CM-ID","sbx")
-                .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
-                .body(Mono.just(fetchModeRequest1),FetchModeRequest.class)
-                .retrieve().bodyToMono(Object.class);
-        return res;
-    }
-
-    //@PostMapping("/otp")
-    public Mono<Object> OTP(){
+    @PostMapping("/otp")
+    public Mono<Object> OTP(@RequestParam String mode){
 
         AuthInitRequest authInitRequest=new AuthInitRequest();
         UUID uuid = UUID.randomUUID();
@@ -166,11 +176,11 @@ public class FetchModeController {
         InitRequestQuery initRequestQuery=new InitRequestQuery();
         initRequestQuery.setId(abhaid);
         initRequestQuery.setPurpose("KYC_AND_LINK");
-        initRequestQuery.setAuthMode("MOBILE_OTP");
+        initRequestQuery.setAuthMode(mode);
 
         Requester requester=new Requester();
         requester.setType("HIP");
-        requester.setId("demo-hip-6");
+        requester.setId("iiitbteam18");
 
         initRequestQuery.setRequester(requester);
 
@@ -188,6 +198,8 @@ public class FetchModeController {
                 .body(Mono.just(authInitRequest), AuthInitRequest.class)
                 .retrieve()
                 .bodyToMono(Object.class);
+
+        System.out.println("INitcomplete");
         return res;
     }
 
@@ -256,6 +268,8 @@ public class FetchModeController {
 
     @GetMapping("/getpatientdata")
     public OnConfirmPatient getPatientdata(){
+        System.out.println(patient.getName());
+        System.out.println(patient.getAddress().getState());
         return patient;
     }
 //    public void fectchmodabdm(@RequestBody FetchModeRequest root){

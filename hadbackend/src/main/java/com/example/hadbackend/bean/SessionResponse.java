@@ -4,13 +4,14 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class SessionResponse {
-    private String accesstoken;
-    private int expiresin;
-    private int refreshexpiresIn;
+    private String accessToken;
+    private int expiresIn;
+    private int refreshExpiresIn;
     private String refreshToken;
-    private String tokentypt;
+    private String tokenType;
 
     public String getAccesstoken(){
-        return this.accesstoken;
+        return this.accessToken;
     }
+    public String getTokenType(){return this.tokenType;}
 }
