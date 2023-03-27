@@ -1,21 +1,30 @@
 package com.example.hadbackend.controller;
 
 import com.example.hadbackend.bean.*;
+import com.example.hadbackend.service.GetPatientDetails;
+import com.example.hadbackend.service.InitAuthService;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.tomcat.util.http.parser.Authorization;
+import org.apache.tomcat.websocket.AuthenticationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +36,7 @@ public class FetchModeController {
 
 
     WebClient webClient=WebClient.create();
-    String token;
+    public String token;
     //Callback
     String abhaid;
 
@@ -36,22 +45,30 @@ public class FetchModeController {
     SessionResponse sessionResponse;
 
     FetchMode fetchMode;
-    OnConfirmPatient patient;
+    public OnConfirmPatient patient;
+
+    public InitAuthService initAuthService=new InitAuthService();
+    public GetPatientDetails getPatientDetails=new GetPatientDetails();
+
     @PostMapping("/v0.5/users/auth/on-fetch-modes")
     @CrossOrigin(origins = "*")
+    @Retryable(value=NullPointerException.class, maxAttempts = 3, backoff = @Backoff(value=2000))
     public void Fetchcallback(@RequestBody FetchMode root){
         System.out.println(root.getRequestId());
+        System.out.println("on-fetch-modes callback");
         fetchMode=root;
     }
 
     @PostMapping("/v0.5/users/auth/on-init")
+    @Retryable(value=NullPointerException.class, maxAttempts = 3, backoff = @Backoff(value=2000))
     public void Initcallback(@RequestBody OnInitResponse root){
-        System.out.println(root.getInitAuth().getTransactionid());
+//        System.out.println(root.getInitAuth().getTransactionid());
         transactionid=root.getInitAuth().getTransactionid();
         System.out.println("hi");
     }
 
     @PostMapping("/v0.5/users/auth/on-confirm")
+    @Retryable(value=NullPointerException.class, maxAttempts = 3, backoff = @Backoff(value=2000))
     public void Confirmcallback(@RequestBody OnConfirmResponse root){
 //        System.out.println(root.getRequestid());
 //        System.out.println(root.getAuth().getPatient().getName());
@@ -81,6 +98,7 @@ public class FetchModeController {
 
     @PostMapping("/fetchdetails")
     public Mono<Object> fetchmodeABHA(@RequestParam String id) {
+        getsession();
         abhaid=id;
         FetchModeRequest fetchModeRequest =new FetchModeRequest();
         UUID uuid = UUID.randomUUID();
@@ -115,7 +133,6 @@ public class FetchModeController {
         System.out.println(fetchModeRequest.getQuery().getRequester().getType());
         System.out.println(token);
 
-
         Mono<Object> res = webClient.post()
                 .uri("https://dev.abdm.gov.in/gateway/v0.5/users/auth/fetch-modes")
                 .header(HttpHeaders.AUTHORIZATION,token)
@@ -127,36 +144,15 @@ public class FetchModeController {
     }
 
     @GetMapping("/getmodes")
+    @Retryable(value=NullPointerException.class, maxAttempts = 3, backoff = @Backoff(value=2000))
     public List<String> getModes(){
         System.out.println("getmodes"+ fetchMode.getAuth().getModes().get(0));
         return fetchMode.getAuth().getModes();
     }
 
-   // ,@RequestParam String id
-
-//    @PostMapping("/fetch")
-//    public Mono<Object> fetchmodeABHA(@RequestHeader(HttpHeaders.AUTHORIZATION) String token, @RequestBody FetchModeRequest fetchModeRequest1) {
-//
-//        System.out.println(fetchModeRequest1.getRequestId());
-//        System.out.println(fetchModeRequest1.getTimestamp());
-//        System.out.println(fetchModeRequest1.getQuery().getId());
-//        System.out.println(fetchModeRequest1.getQuery().getPurpose());
-//        System.out.println(fetchModeRequest1.getQuery().getRequester().getId());
-//        System.out.println(fetchModeRequest1.getQuery().getRequester().getType());
-//        System.out.println(token);
-//
-//
-//        Mono<Object> res = webClient.post()
-//                .uri("https://dev.abdm.gov.in/gateway/v0.5/users/auth/fetch-modes")
-//                .header(HttpHeaders.AUTHORIZATION,token)
-//                .header("X-CM-ID","sbx")
-//                .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
-//                .body(Mono.just(fetchModeRequest1),FetchModeRequest.class)
-//                .retrieve().bodyToMono(Object.class);
-//        return res;
-//    }
 
     @PostMapping("/otp")
+    @Retryable(value= WebClientResponseException.class, maxAttempts = 3, backoff = @Backoff(value=2000))
     public Mono<Object> OTP(@RequestParam String mode){
 
         AuthInitRequest authInitRequest=new AuthInitRequest();
@@ -197,10 +193,12 @@ public class FetchModeController {
                 .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
                 .body(Mono.just(authInitRequest), AuthInitRequest.class)
                 .retrieve()
-                .bodyToMono(Object.class);
+                .bodyToMono(Object.class)
+                .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)));;
 
         System.out.println("INitcomplete");
         return res;
+        //return initAuthService.initauthservice(authInitRequest);
     }
 
     @PostMapping("/init")
@@ -218,6 +216,7 @@ public class FetchModeController {
 
 
     @PostMapping("/confirmotp")
+    @Retryable(value=NullPointerException.class, maxAttempts = 3, backoff = @Backoff(value=2000))
     public Mono<Object> confirmAuth(@RequestParam String authcode) {
 
         OnConfirmRequest confirmRequest=new OnConfirmRequest();
@@ -268,10 +267,10 @@ public class FetchModeController {
 
     @GetMapping("/getpatientdata")
     public OnConfirmPatient getPatientdata(){
-        System.out.println(patient.getName());
-        System.out.println(patient.getAddress().getState());
-        return patient;
+//        System.out.println(patient.getName());
+//        System.out.println(patient.getAddress().getState());
+//        return patient;
+            return getPatientDetails.getpatientdetails();
     }
-//    public void fectchmodabdm(@RequestBody FetchModeRequest root){
-//    }.
+
 }
