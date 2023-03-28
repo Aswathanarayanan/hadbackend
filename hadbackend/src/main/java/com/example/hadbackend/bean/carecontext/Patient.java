@@ -1,5 +1,6 @@
 package com.example.hadbackend.bean.carecontext;
 
+import com.example.hadbackend.bean.Login;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -33,13 +34,13 @@ public class Patient {
     private String gender;
 
     @Column
-    private int yearOfBirth;
+    private int year;
 
     @Column
-    private int monthOfBirth;
+    private int month;
 
     @Column
-    private int dayOfBirth;
+    private int day;
 
 //    @OneToOne
 //    @JoinColumn(name = "addressid",referencedColumnName = "id")
@@ -47,10 +48,7 @@ public class Patient {
 //    private Address address;
 
     @Column
-    private Long mobilenum;
-
-    @Column
-    private String line;
+    private Long mobile;
 
     @Column
     private String district;
@@ -65,5 +63,8 @@ public class Patient {
 //    @JoinColumn(name = "identifierid"
     @Column
     private int appoinement;
+
+    @OneToOne
+    private Login doctor;
 
 }

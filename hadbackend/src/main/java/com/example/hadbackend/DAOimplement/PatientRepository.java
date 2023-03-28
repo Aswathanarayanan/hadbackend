@@ -1,6 +1,7 @@
 package com.example.hadbackend.DAOimplement;
 
 import com.example.hadbackend.DAO.ObjectRepository;
+import com.example.hadbackend.bean.Login;
 import com.example.hadbackend.bean.carecontext.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
@@ -26,7 +27,7 @@ public interface PatientRepository extends JpaRepository<Patient,Integer> {
 //    public Patient select(int id){
 //        return repository.get(id);
     Patient findPatientsById(String abhaid);
-    List<Patient> findPatientsByAppoinement(int ap);
+    List<Patient> findPatientsByAppoinementAndDoctor(int ap, String doctoremail);
 }
 
 //    }

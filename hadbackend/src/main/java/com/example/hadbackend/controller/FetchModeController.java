@@ -1,5 +1,6 @@
 package com.example.hadbackend.controller;
 
+import com.example.hadbackend.DAOimplement.LoginRepository;
 import com.example.hadbackend.bean.*;
 import com.example.hadbackend.service.GetPatientDetails;
 import com.example.hadbackend.service.InitAuthService;
@@ -11,6 +12,7 @@ import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -270,7 +272,31 @@ public class FetchModeController {
 //        System.out.println(patient.getName());
 //        System.out.println(patient.getAddress().getState());
 //        return patient;
-            return getPatientDetails.getpatientdetails();
+            return patient;
+    }
+
+
+    @Autowired
+    LoginRepository loginRepository;
+    @PostMapping("/adduser")
+    public void addUser(@RequestBody Login login){
+        loginRepository.save(login);
+    }
+
+    @GetMapping("/login")
+    @ResponseStatus(
+            value = HttpStatus.NOT_FOUND,
+            reason = "Requested student does not exist"
+    )
+    public void loginUser(@RequestBody Login login){
+        System.out.println("login");
+        Login l=loginRepository.findAllByEmailAndPasswordAndRole(login.getEmail(),login.getPassword(),login.getRole());
+        //System.out.println(l.getRole());
+        if(l==null)
+            System.out.println("ivalid login");
+        else
+            System.out.println(l.getRole());
+
     }
 
 }
