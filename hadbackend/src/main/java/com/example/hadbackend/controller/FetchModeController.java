@@ -299,15 +299,13 @@ public class FetchModeController {
     }
 
     @PostMapping("/login")
-    public void loginUser(@RequestBody Login login){
+    public String loginUser(@RequestBody Login login){
         System.out.println("login");
         Login l=loginRepository.findAllByEmailAndPasswordAndRole(login.getEmail(),login.getPassword(),login.getRole());
         //System.out.println(l.getRole());
-        if(l==null)
-            System.out.println("ivalid login");
-        else
-            System.out.println(l.getRole());
-
+        if(l!=null)
+            return "Success";
+        return "Failure";
     }
 
     @Autowired
