@@ -12,5 +12,5 @@ import lombok.Setter;
 public class AddContectLinkRequest {
 
     private String accessToken;
-    private AddContextPatientRequest addContextPatientRequest;
+    private AddContextPatientRequest patient;
  }

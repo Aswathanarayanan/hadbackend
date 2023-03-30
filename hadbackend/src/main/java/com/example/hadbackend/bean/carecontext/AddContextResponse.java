@@ -1,5 +1,6 @@
 package com.example.hadbackend.bean.carecontext;
 
+import com.example.hadbackend.bean.Err;
 import com.example.hadbackend.bean.Resp;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.Getter;
@@ -16,6 +17,6 @@ public class AddContextResponse {
     private String requestId;
     private  String timestamp;
     private Acknowledgement acknowledgement;
-    private Error error;
+    private Err error;
     private Resp resp;
 }

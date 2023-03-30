@@ -14,7 +14,7 @@ import java.util.List;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AddContextPatientRequest {
 
-    private Integer referenceNumber;
+    private String referenceNumber;
     private  String display;
     private ArrayList<AddContextcareContextsRequest> careContexts;
 }

@@ -298,7 +298,7 @@ public class FetchModeController {
         loginRepository.save(login);
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public void loginUser(@RequestBody Login login){
         System.out.println("login");
         Login l=loginRepository.findAllByEmailAndPasswordAndRole(login.getEmail(),login.getPassword(),login.getRole());
@@ -335,9 +335,9 @@ public class FetchModeController {
         // fetchModeController.initAuthService()
     }
     @PostMapping("/carecontext")
-    public Mono<Object> carecontext(){
+    public void carecontext(){
 
-        String token1="Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE2ODAxNDUwNjcsImlhdCI6MTY4MDE0NDQ2NywianRpIjoiMjIwNWUwZjEtYzg1Yy00ZDNjLTg1Y2ItYTFiZmUxNTYyNzQ2IiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiI5M2JlMjdmNS1jNDhhLTQwY2MtODQxZC03OGVmYzhhMWNhMDciLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhfMDAyODU5Iiwic2Vzc2lvbl9zdGF0ZSI6IjYzZDk4Njc2LWM3NmEtNDUxYi05MWYzLTc1NzA1N2VjYjIyMSIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovL2xvY2FsaG9zdDo5MDA3Il0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJoaXUiLCJvZmZsaW5lX2FjY2VzcyIsImhlYWx0aElkIiwiT0lEQyIsImhpcCJdfSwicmVzb3VyY2VfYWNjZXNzIjp7IlNCWF8wMDI4NTkiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJjbGllbnRJZCI6IlNCWF8wMDI4NTkiLCJjbGllbnRIb3N0IjoiMTAuMjMzLjY5LjI0NyIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoic2VydmljZS1hY2NvdW50LXNieF8wMDI4NTkiLCJjbGllbnRBZGRyZXNzIjoiMTAuMjMzLjY5LjI0NyJ9.D6f4VJKNbT6eNe_-X_VjIaUANnebkhn48ORmXFhg3ZDfrS-bdlW2Y0zkBSk3mhJFC5eWFkV-BSZA6E2qZbT1saXlAomN2oPFrVXpjI3Obemgf0lmmDXnpx2Noi7dAmsVBMQcDEDkWFlALhLA6ih-tBlaqjfV3Wgf-SYv7s-vWaaJmwo-5c8VPcn8Y86V02HRTFg1bzc9LurUe0_5U7XNe47dwokceSkXooXTO6Y5uUrecrUsPWlQNcUAd-8u_1TXZWbHAQN7cqXKvR2RgaoM_pdSgD0USnBQTSekdmGowEz-aQgIjaPh-NIFNSrIynVHBIEcEbZurNLN-rRHs7TjKg";
+        //String token1="eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE2ODAxNDUwNjcsImlhdCI6MTY4MDE0NDQ2NywianRpIjoiMjIwNWUwZjEtYzg1Yy00ZDNjLTg1Y2ItYTFiZmUxNTYyNzQ2IiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiI5M2JlMjdmNS1jNDhhLTQwY2MtODQxZC03OGVmYzhhMWNhMDciLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhfMDAyODU5Iiwic2Vzc2lvbl9zdGF0ZSI6IjYzZDk4Njc2LWM3NmEtNDUxYi05MWYzLTc1NzA1N2VjYjIyMSIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovL2xvY2FsaG9zdDo5MDA3Il0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJoaXUiLCJvZmZsaW5lX2FjY2VzcyIsImhlYWx0aElkIiwiT0lEQyIsImhpcCJdfSwicmVzb3VyY2VfYWNjZXNzIjp7IlNCWF8wMDI4NTkiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJjbGllbnRJZCI6IlNCWF8wMDI4NTkiLCJjbGllbnRIb3N0IjoiMTAuMjMzLjY5LjI0NyIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwicHJlZmVycmVkX3VzZXJuYW1lIjoic2VydmljZS1hY2NvdW50LXNieF8wMDI4NTkiLCJjbGllbnRBZGRyZXNzIjoiMTAuMjMzLjY5LjI0NyJ9.D6f4VJKNbT6eNe_-X_VjIaUANnebkhn48ORmXFhg3ZDfrS-bdlW2Y0zkBSk3mhJFC5eWFkV-BSZA6E2qZbT1saXlAomN2oPFrVXpjI3Obemgf0lmmDXnpx2Noi7dAmsVBMQcDEDkWFlALhLA6ih-tBlaqjfV3Wgf-SYv7s-vWaaJmwo-5c8VPcn8Y86V02HRTFg1bzc9LurUe0_5U7XNe47dwokceSkXooXTO6Y5uUrecrUsPWlQNcUAd-8u_1TXZWbHAQN7cqXKvR2RgaoM_pdSgD0USnBQTSekdmGowEz-aQgIjaPh-NIFNSrIynVHBIEcEbZurNLN-rRHs7TjKg";
         AddContextRequest addContextRequest=new AddContextRequest();
 
         UUID uuid = UUID.randomUUID();
@@ -352,18 +352,19 @@ public class FetchModeController {
 
         //link
         AddContectLinkRequest addContectLinkRequest=new AddContectLinkRequest();
-        //addContectLinkRequest.setAccessToken(onConfirmResponse.getAuth().getAccessToken());
+        addContectLinkRequest.setAccessToken(onConfirmResponse.getAuth().getAccessToken());
+        //addContectLinkRequest.setAccessToken(token1);
 
         //link-->patient
         AddContextPatientRequest addContextPatientRequest=new AddContextPatientRequest();
 
-        addContextPatientRequest.setReferenceNumber(1);
+        addContextPatientRequest.setReferenceNumber("1esf");
         addContextPatientRequest.setDisplay("Aswatha Narayanan");
 
 
         //link-->patient-->carecontext
         AddContextcareContextsRequest addContextcareContextsRequest=new AddContextcareContextsRequest();
-        addContextcareContextsRequest.setReferenceNumber("2023-03-29T17:07:23.000142");
+        addContextcareContextsRequest.setReferenceNumber("20230329170723000142");
         String displaymessage= "Consluted by " + asISO;
         addContextcareContextsRequest.setDisplay(displaymessage);
 
@@ -373,13 +374,20 @@ public class FetchModeController {
         addContextPatientRequest.setCareContexts(listcarecontext);
 
         //link<--patient
-       // addContectLinkRequest.setAddContextPatientRequest(addContextPatientRequest);
+        addContectLinkRequest.setPatient(addContextPatientRequest);
         //requestbody<--link
         addContextRequest.setLink(addContectLinkRequest);
 
+        System.out.println(addContextRequest.getRequestId());
+        System.out.println(addContextRequest.getTimestamp());
+        //link
         System.out.println(addContextRequest.getLink().getAccessToken());
-//        System.out.println(addContextRequest.getLink().getAddContextPatientRequest().getDisplay());
-//        System.out.println(addContextRequest.getLink().getAddContextPatientRequest().getCareContexts().get(0).getDisplay());
+        //patient
+        System.out.println(addContextRequest.getLink().getPatient().getReferenceNumber());
+        System.out.println(addContextRequest.getLink().getPatient().getDisplay());
+        //carecontexts
+        System.out.println(addContextRequest.getLink().getPatient().getCareContexts().get(0).getReferenceNumber());
+        System.out.println(addContextRequest.getLink().getPatient().getCareContexts().get(0).getDisplay());
 
         Mono<Object> res = webClient.post()
                 .uri("https://dev.abdm.gov.in/gateway/v0.5/links/link/add-contexts")
@@ -393,7 +401,11 @@ public class FetchModeController {
         else
             System.out.println("callbacksuccess");
         System.out.println("addded care context");
-        return res;
+        //return res;
     }
 
+    @PostMapping("/v0.5/consents/hip/notify")
+    public void Notify(NotifyResponse root){
+
+    }
 }
