@@ -20,8 +20,7 @@ public class Medicalrecords {
     private int id;
 
     @Column
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int vistid;
+    private String vistid;
 
     @Column
     private String prescription;

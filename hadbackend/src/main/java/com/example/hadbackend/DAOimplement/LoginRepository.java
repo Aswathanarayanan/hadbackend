@@ -15,4 +15,7 @@ public interface LoginRepository extends JpaRepository<Login,Integer> {
 
     List<Login> findAllByRole(String role);
 
+    Login findAllByEmail(String email);
+    Login findAllByIdAndRole(Integer id,String role);
+
 }

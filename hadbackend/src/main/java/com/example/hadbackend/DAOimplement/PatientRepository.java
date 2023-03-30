@@ -27,7 +27,8 @@ public interface PatientRepository extends JpaRepository<Patient,Integer> {
 //    public Patient select(int id){
 //        return repository.get(id);
     Patient findPatientsById(String abhaid);
-    List<Patient> findPatientsByAppoinementAndDoctor(int ap, String doctoremail);
+    Patient findPatientsByPatientid(Integer id);
+    List<Patient> findPatientsByAppoinementAndDoctor(int ap, Login l);
 }
 
 //    }

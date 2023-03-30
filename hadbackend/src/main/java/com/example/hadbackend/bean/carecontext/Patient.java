@@ -27,7 +27,7 @@ public class Patient {
     @Column
     private String id;
 
-    @Column()
+    @Column
     private String name;
 
     @Column
@@ -57,7 +57,9 @@ public class Patient {
     private String state;
 
     @Column
-    private String pincode;
+    private String visitid;
+//    @Column
+//    private String pincode;
 
 //    @OneToMany
 //    @JoinColumn(name = "identifierid"

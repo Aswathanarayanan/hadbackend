@@ -11,6 +11,12 @@ import lombok.Setter;
 //@NoArgsConstructor
 //@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 //@Entity
+
+
+@Getter
+@Setter
+@NoArgsConstructor
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Embeddable
 public class Address {
 //

@@ -18,6 +18,17 @@ public class HadbackendApplication {
             registry.addMapping("/**");
         }
     }
+
+    //saving the accesstoken for care context
+
+//    String accesstoken;
+//
+//    public void setAccesstoken(String accesstoken){
+//        this.accesstoken=accesstoken;
+//    }
+//    public String getAccesstoken(){
+//        return this.accesstoken;
+//    }
     public static void main(String[] args) {
         SpringApplication.run(HadbackendApplication.class, args);
     }

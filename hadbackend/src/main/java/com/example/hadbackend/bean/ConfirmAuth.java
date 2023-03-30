@@ -13,4 +13,8 @@ public class ConfirmAuth {
     public OnConfirmPatient getPatient(){
         return this.patient;
     }
+
+    public String getAccessToken(){
+        return this.accessToken;
+    }
 }
