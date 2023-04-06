@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AddContectLinkRequest {
+public class Link {
 
     private String accessToken;
-    private AddContextPatientRequest patient;
+    AddContextPatientRequest patient;
  }
