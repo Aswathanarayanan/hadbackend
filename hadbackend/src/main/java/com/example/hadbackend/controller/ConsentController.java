@@ -42,11 +42,12 @@ public class ConsentController {
   
     FetchModeController fetchModeController=new FetchModeController();
 
-    String token = fetchModeController.getsession();
+    String token;
 
     @PostMapping("/generateconsent")
     public void generateConsent(@RequestBody ConsentRequestFromFrontend consentRequestFromFrontend) throws JsonProcessingException{
 
+            token =fetchModeController.getsession();
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -107,12 +108,12 @@ public class ConsentController {
             
             ConsentDateRange consentDateRange=new ConsentDateRange();
             
-            consentDateRange.setFrom(consentRequestFromFrontend.getDateFrom());
-            consentDateRange.setTo(consentRequestFromFrontend.getDateTo());
+            consentDateRange.setFrom(consentRequestFromFrontend.getDateFrom()+"T12:52:34.925Z");
+            consentDateRange.setTo(consentRequestFromFrontend.getDateTo()+"T12:52:34.925Z");
             
             consentPermission.setDateRange(consentDateRange);
 
-            consentPermission.setDataEraseAt(consentRequestFromFrontend.getExpirayDate());
+            consentPermission.setDataEraseAt(consentRequestFromFrontend.getExpirayDate()+"T12:52:34.925Z");
             
             ConsentFrequency consentFrequency=new ConsentFrequency();
             consentFrequency.setUnit("HOUR");
