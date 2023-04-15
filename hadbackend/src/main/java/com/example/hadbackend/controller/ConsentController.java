@@ -42,11 +42,13 @@ public class ConsentController {
   
     FetchModeController fetchModeController=new FetchModeController();
 
-    String token = fetchModeController.getsession();
+    String token;
 
     @PostMapping("/generateconsent")
     public void generateConsent(@RequestBody ConsentRequestFromFrontend consentRequestFromFrontend) throws JsonProcessingException{
 
+            //token
+            token =fetchModeController.getsession();
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -82,7 +84,7 @@ public class ConsentController {
             consent.setPatient(consentPatient);
 
             ConsentHIU consentHIU = new ConsentHIU();
-            consentHIU.setId("iiitbteam18hiu");
+            consentHIU.setId("ashish-hiu-1");
 
             consent.setHiu(consentHIU);
 
@@ -91,7 +93,7 @@ public class ConsentController {
 
             ConsentRequesterIdentifier consentRequesterIdentifier=new ConsentRequesterIdentifier();
             consentRequesterIdentifier.setType("HIU");
-            consentRequesterIdentifier.setValue("IIITB team 18 HIU");
+            consentRequesterIdentifier.setValue("Ashish IIITB HIU");
             consentRequesterIdentifier.setSystem("");
 
             consentRequester.setIdentifier(consentRequesterIdentifier);
@@ -124,12 +126,7 @@ public class ConsentController {
             consent.setPermission(consentPermission);
 
             consentRequest.setConsent(consent);
-
-            System.out.println(consentRequest.getConsent().getPermission().getDateRange().getFrom());
-            System.out.println(consentRequest.getConsent().getPermission().getDateRange().getTo());
-            System.out.println(consentRequest.getConsent().getPurpose().getText());
-            System.out.println(token);
-
+            
             String curr_body=new ObjectMapper().writeValueAsString(consentRequest);
             HttpEntity<String> httpEntity = new HttpEntity<>(curr_body, headers);
             
