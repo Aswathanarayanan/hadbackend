@@ -47,6 +47,7 @@ public class ConsentController {
     @PostMapping("/generateconsent")
     public void generateConsent(@RequestBody ConsentRequestFromFrontend consentRequestFromFrontend) throws JsonProcessingException{
 
+            //token
             token =fetchModeController.getsession();
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
