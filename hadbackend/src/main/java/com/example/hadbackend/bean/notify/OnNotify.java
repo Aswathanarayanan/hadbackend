@@ -1,6 +1,6 @@
 package com.example.hadbackend.bean.notify;
 
-import com.example.hadbackend.bean.Resp;
+import com.example.hadbackend.bean.auth.Resp;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import lombok.Getter;
