@@ -1,12 +1,11 @@
 package com.example.hadbackend.bean.carecontext;
 
-import com.example.hadbackend.bean.Err;
-import com.example.hadbackend.bean.Resp;
+import com.example.hadbackend.bean.auth.Err;
+import com.example.hadbackend.bean.auth.Resp;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.boot.autoconfigure.jms.JmsProperties;
 
 
 @Getter

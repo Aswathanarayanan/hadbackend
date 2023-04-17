@@ -1,6 +1,6 @@
 package com.example.hadbackend.bean.carecontext;
 
-import com.example.hadbackend.bean.Login;
+import com.example.hadbackend.bean.auth.Login;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import jakarta.persistence.*;
 import lombok.Getter;

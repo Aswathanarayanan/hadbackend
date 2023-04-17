@@ -1,4 +1,4 @@
-package com.example.hadbackend.bean;
+package com.example.hadbackend.bean.auth;
 
 import jakarta.persistence.*;
 import org.springframework.lang.NonNull;

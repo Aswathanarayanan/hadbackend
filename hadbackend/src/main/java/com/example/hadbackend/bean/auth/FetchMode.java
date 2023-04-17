@@ -1,7 +1,6 @@
-package com.example.hadbackend.bean;
+package com.example.hadbackend.bean.auth;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import org.springframework.context.annotation.Bean;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class FetchMode {

@@ -4,7 +4,7 @@ import com.example.hadbackend.DAOimplement.LoginRepository;
 import com.example.hadbackend.DAOimplement.MedicalData;
 import com.example.hadbackend.DAOimplement.PatientRepository;
 import com.example.hadbackend.HadbackendApplication;
-import com.example.hadbackend.bean.*;
+import com.example.hadbackend.bean.auth.*;
 import com.example.hadbackend.bean.carecontext.*;
 import com.example.hadbackend.service.GetPatientDetails;
 import com.example.hadbackend.service.InitAuthService;

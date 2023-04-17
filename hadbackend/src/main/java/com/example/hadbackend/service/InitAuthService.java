@@ -1,9 +1,7 @@
 package com.example.hadbackend.service;
 
-import com.example.hadbackend.bean.AuthInitRequest;
-import com.example.hadbackend.bean.FetchModeRequest;
+import com.example.hadbackend.bean.auth.AuthInitRequest;
 import com.example.hadbackend.controller.FetchModeController;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
