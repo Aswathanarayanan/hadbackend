@@ -1,4 +1,4 @@
-package com.example.hadbackend.bean;
+package com.example.hadbackend.bean.auth;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.Getter;

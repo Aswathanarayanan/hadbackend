@@ -93,7 +93,7 @@ public class ConsentController {
 
             ConsentRequesterIdentifier consentRequesterIdentifier=new ConsentRequesterIdentifier();
             consentRequesterIdentifier.setType("HIU");
-            consentRequesterIdentifier.setValue("Ashish IIITB HIU");
+            consentRequesterIdentifier.setValue("IIITB team 18 HIU");
             consentRequesterIdentifier.setSystem("");
 
             consentRequester.setIdentifier(consentRequesterIdentifier);

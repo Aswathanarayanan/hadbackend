@@ -3,32 +3,21 @@ package com.example.hadbackend.controller;
 import com.example.hadbackend.DAOimplement.LoginRepository;
 import com.example.hadbackend.DAOimplement.MedicalData;
 import com.example.hadbackend.DAOimplement.PatientRepository;
-import com.example.hadbackend.HadbackendApplication;
-import com.example.hadbackend.bean.FetchModeRequest;
-import com.example.hadbackend.bean.Login;
-import com.example.hadbackend.bean.SessionRequest;
-import com.example.hadbackend.bean.SessionResponse;
+import com.example.hadbackend.bean.auth.Login;
+import com.example.hadbackend.bean.auth.SessionRequest;
+import com.example.hadbackend.bean.auth.SessionResponse;
 import com.example.hadbackend.bean.carecontext.*;
 import com.example.hadbackend.service.carecontext.Addpatient;
 import com.example.hadbackend.service.carecontext.Appoinment;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
 
 @Getter
 @Setter

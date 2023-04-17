@@ -1,20 +1,21 @@
-package com.example.hadbackend.bean;
+package com.example.hadbackend.bean.auth;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class OnInitResponse {
-    private String requstId;
+public class OnConfirmResponse {
+    private String requestId;
     private String timestamp;
-    private InitAuth auth;
+    private ConfirmAuth auth;
     private Err error;
     private Resp resp;
 
-    public void setInitAuth(InitAuth auth){
-        this.auth=auth;
+    public String getRequestid(){
+        return this.requestId;
     }
-
-    public InitAuth getInitAuth(){
+    public ConfirmAuth getAuth(){
         return this.auth;
     }
+
 }

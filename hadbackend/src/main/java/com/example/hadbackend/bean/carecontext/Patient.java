@@ -1,14 +1,11 @@
 package com.example.hadbackend.bean.carecontext;
 
-import com.example.hadbackend.bean.Login;
+import com.example.hadbackend.bean.auth.Login;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 
 @Getter

@@ -1,6 +1,6 @@
 package com.example.hadbackend.service;
 
-import com.example.hadbackend.bean.OnConfirmPatient;
+import com.example.hadbackend.bean.auth.OnConfirmPatient;
 import com.example.hadbackend.controller.FetchModeController;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;

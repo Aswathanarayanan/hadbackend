@@ -2,7 +2,7 @@ package com.example.hadbackend.service.carecontext;
 
 import com.example.hadbackend.DAOimplement.LoginRepository;
 import com.example.hadbackend.DAOimplement.PatientRepository;
-import com.example.hadbackend.bean.Login;
+import com.example.hadbackend.bean.auth.Login;
 import com.example.hadbackend.bean.carecontext.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
