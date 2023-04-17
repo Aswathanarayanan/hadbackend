@@ -4,7 +4,6 @@ import com.example.hadbackend.DAOimplement.LoginRepository;
 import com.example.hadbackend.DAOimplement.MedicalData;
 import com.example.hadbackend.DAOimplement.PatientRepository;
 import com.example.hadbackend.HadbackendApplication;
-import com.example.hadbackend.bean.FetchModeRequest;
 import com.example.hadbackend.bean.Login;
 import com.example.hadbackend.bean.SessionRequest;
 import com.example.hadbackend.bean.SessionResponse;
@@ -100,8 +99,4 @@ public class CareContextController {
         return loginRepository.findAllByRole("doctor");
     }
 
-    @PostMapping("/v0.5/consents/hip/notify")
-    public void Notify(NotifyResponse root){
-
-    }
 }

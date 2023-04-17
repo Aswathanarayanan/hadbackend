@@ -24,6 +24,7 @@ import com.example.hadbackend.bean.consent.ConsentRequest;
 import com.example.hadbackend.bean.consent.ConsentRequestFromFrontend;
 import com.example.hadbackend.bean.consent.ConsentRequester;
 import com.example.hadbackend.bean.consent.ConsentRequesterIdentifier;
+import com.example.hadbackend.bean.consent.OnInitConsentRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -135,4 +136,10 @@ public class ConsentController {
             System.out.println(objectResponseEntity.getStatusCode());
 
     }
+
+    @PostMapping("/v0.5/consent-requests/on-init")
+    public void onInitConsentRequest(OnInitConsentRequest root){
+
+    }
+
 }
