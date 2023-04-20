@@ -7,13 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
+@Setter
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Notification {
-    private ConsentDetail ConsentDetail;
-    private String status;
-    private String signature;
-    private String consentId;
-    private boolean grantAcknowledgement;
+public class NotifycareContext {
+    
+    private String patientReference;
+    private String careContextReference;
 }

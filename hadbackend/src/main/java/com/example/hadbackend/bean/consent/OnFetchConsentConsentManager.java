@@ -1,4 +1,4 @@
-package com.example.hadbackend.bean.notify;
+package com.example.hadbackend.bean.consent;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
@@ -10,8 +10,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class NotifyResponse {
-    private Notification notification;
-    private String requestId;
-    private String timestamp;
+public class OnFetchConsentConsentManager {
+    private String id;
 }

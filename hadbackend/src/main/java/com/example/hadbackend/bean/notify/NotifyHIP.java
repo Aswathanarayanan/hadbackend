@@ -6,14 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
+@Getter 
 @Setter
 @NoArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Notification {
-    private ConsentDetail ConsentDetail;
-    private String status;
-    private String signature;
-    private String consentId;
-    private boolean grantAcknowledgement;
+public class NotifyHIP {
+    
+    private String id;
+    private String name;   
 }

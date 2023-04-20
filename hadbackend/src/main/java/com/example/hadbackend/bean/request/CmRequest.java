@@ -16,4 +16,6 @@ public class CmRequest {
     private String timestamp;
     private CmRequesthiRequest hiRequest;
     
+    
+
 }

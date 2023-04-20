@@ -4,15 +4,21 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.hadbackend.DAOimplement.MedicalData;
+import com.example.hadbackend.DAOimplement.PatientRepository;
+import com.example.hadbackend.bean.carecontext.Medicalrecords;
 import com.example.hadbackend.bean.consent.Consent;
 import com.example.hadbackend.bean.consent.ConsentDateRange;
 import com.example.hadbackend.bean.consent.ConsentFrequency;
@@ -27,6 +33,8 @@ import com.example.hadbackend.bean.consent.ConsentRequesterIdentifier;
 import com.example.hadbackend.bean.consent.OnInitConsentRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 
 import org.springframework.web.client.RestTemplate;
 
@@ -44,6 +52,12 @@ public class ConsentController {
     FetchModeController fetchModeController=new FetchModeController();
 
     String token;
+
+    @Autowired 
+    MedicalData medicalData;
+
+    @Autowired
+    PatientRepository patientRepository;
 
     @PostMapping("/generateconsent")
     public void generateConsent(@RequestBody ConsentRequestFromFrontend consentRequestFromFrontend) throws JsonProcessingException{
@@ -94,7 +108,7 @@ public class ConsentController {
 
             ConsentRequesterIdentifier consentRequesterIdentifier=new ConsentRequesterIdentifier();
             consentRequesterIdentifier.setType("HIU");
-            consentRequesterIdentifier.setValue("IIITB team 18 HIU");
+            consentRequesterIdentifier.setValue("Ashish IIITB HIU");
             consentRequesterIdentifier.setSystem("");
 
             consentRequester.setIdentifier(consentRequesterIdentifier);
@@ -140,6 +154,11 @@ public class ConsentController {
     @PostMapping("/v0.5/consent-requests/on-init")
     public void onInitConsentRequest(OnInitConsentRequest root){
 
+    }
+
+    @GetMapping("/getcarecontextList")
+    public List<Medicalrecords> getCareContextList(@RequestParam String abhaid){
+        return medicalData.findByPatient(patientRepository.findPatientsById(abhaid));
     }
 
 }
