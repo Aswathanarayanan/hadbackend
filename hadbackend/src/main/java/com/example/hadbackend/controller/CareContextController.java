@@ -3,6 +3,7 @@ package com.example.hadbackend.controller;
 import com.example.hadbackend.DAOimplement.LoginRepository;
 import com.example.hadbackend.DAOimplement.MedicalData;
 import com.example.hadbackend.DAOimplement.PatientRepository;
+import com.example.hadbackend.HadbackendApplication;
 import com.example.hadbackend.bean.auth.Login;
 import com.example.hadbackend.bean.auth.SessionRequest;
 import com.example.hadbackend.bean.auth.SessionResponse;
@@ -89,8 +90,4 @@ public class CareContextController {
         return loginRepository.findAllByRole("doctor");
     }
 
-    @PostMapping("/v0.5/consents/hip/notify")
-    public void Notify(NotifyResponse root){
-
-    }
 }
