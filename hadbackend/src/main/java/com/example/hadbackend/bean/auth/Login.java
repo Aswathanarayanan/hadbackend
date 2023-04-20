@@ -24,6 +24,9 @@ public class Login {
     private int id;
 
     @Column
+    private String name;
+
+    @Column
     private String email;
 
     @Column

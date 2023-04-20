@@ -25,6 +25,25 @@ public class Medicalrecords {
     @Column
     private String prescription;
 
+    @Column
+    private String symptoms;
+
+    @Column
+    private String medicine;
+
+    @Column
+    private String dosage;
+
+    @Column
+    private String pattern;
+
+    @Column
+    private String timings;
+
+    @Column
+    private String instruction;
+
+
     @ManyToOne
     private Patient patient;
 
