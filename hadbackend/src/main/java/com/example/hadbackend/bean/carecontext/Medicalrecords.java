@@ -1,5 +1,7 @@
 package com.example.hadbackend.bean.carecontext;
 
+import java.util.Date;
+
 import com.example.hadbackend.bean.auth.Login;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import jakarta.persistence.*;
@@ -43,6 +45,8 @@ public class Medicalrecords {
     @Column
     private String instruction;
 
+    @Column
+    private Date date; //java util or java sql
 
     @ManyToOne
     private Patient patient;
