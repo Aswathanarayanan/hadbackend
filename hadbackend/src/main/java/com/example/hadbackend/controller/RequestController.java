@@ -1,9 +1,13 @@
 package com.example.hadbackend.controller;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.hadbackend.DAOimplement.ConsentRepository;
+import com.example.hadbackend.DAOimplement.MedicalData;
 import com.example.hadbackend.bean.auth.Resp;
 import com.example.hadbackend.bean.consent.OnFetchConsent;
 import com.example.hadbackend.bean.request.CmRequest;
@@ -22,6 +28,7 @@ import com.example.hadbackend.bean.request.CmRequestDateRange;
 import com.example.hadbackend.bean.request.CmRequestKeyMaterial;
 import com.example.hadbackend.bean.request.CmRequestdhPublicKey;
 import com.example.hadbackend.bean.request.CmRequesthiRequest;
+import com.example.hadbackend.bean.request.ConsentTable;
 import com.example.hadbackend.bean.request.HIPRequest;
 import com.example.hadbackend.bean.request.OnRequest;
 import com.example.hadbackend.bean.request.OnRequesthiRequest;
@@ -40,9 +47,14 @@ import lombok.Setter;
 @RestController
 public class RequestController {
     
+    @Autowired
+    ConsentRepository consentRepository;
+
     FetchModeController fetchModeController=new FetchModeController();
 
     String token;
+
+    int flag=0;
     
     @PostMapping("/v0.5/consents/on-fetch")
     public void requestData(@RequestBody OnFetchConsent onFetchConsent) throws Exception{
@@ -57,7 +69,32 @@ public class RequestController {
         String consentID = onFetchConsent.getConsent().getConsentDetail().getConsentId();
         String dateFrom = onFetchConsent.getConsent().getConsentDetail().getPermission().getDateRange().getFrom();
         String dateTo = onFetchConsent.getConsent().getConsentDetail().getPermission().getDateRange().getTo();
+        
         //Store this data in DB
+
+        String expDate = onFetchConsent.getConsent().getConsentDetail().getPermission().getDataEraseAt();
+      
+        String strPattern = "\\d{4}-\\d{2}-\\d{2}";
+        
+        Pattern pattern = Pattern.compile(strPattern);
+        Matcher matcher = pattern.matcher(expDate);
+        
+        Date date = new Date();
+
+        while( matcher.find() ) {
+            System.out.println( matcher.group());
+            date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+        }
+       
+        ConsentTable consentTable = new ConsentTable();
+        
+        consentTable.setAbhaid(onFetchConsent.getConsent().getConsentDetail().getPatient().getId());
+        consentTable.setConsentId(consentID);
+        consentTable.setExpiryDate(date);
+
+        consentRepository.save(consentTable);
+
+        System.out.println("Consent Artifact saved in DB");
 
         //cm/request
 
@@ -135,7 +172,6 @@ public class RequestController {
         ResponseEntity<Object> objectResponseEntity=restTemplate.exchange("https://dev.abdm.gov.in/gateway/v0.5/health-information/cm/request", HttpMethod.POST, httpEntity,Object.class);
             
         System.out.println(objectResponseEntity.getStatusCode());
-
     }
 
 
@@ -203,7 +239,52 @@ public class RequestController {
 
         System.out.println("Sending Data ......");
 
+        if(flag==0){
+
+            flag=1;
+            String consent = hipRequest.getHiRequest().getConsent().getId();
+            
+            
+
+
+            System.out.println("IN Data");
+
+        }
+
     }
 
+    //Test
+    @PostMapping("/saveConsent")
+    public void saveConsent() throws ParseException{
+        String str = "2020-10-06T10:50:37.764Z";
+        
+        String strPattern = "\\d{4}-\\d{2}-\\d{2}";
+        
+        Pattern pattern = Pattern.compile(strPattern);
+        Matcher matcher = pattern.matcher(str);
+        
+        Date date = new Date();
+
+        while( matcher.find() ) {
+            System.out.println( matcher.group());
+            date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+        }
+        // Date date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group(1));
+
+        ConsentTable consentTable = new ConsentTable();
+        consentTable.setAbhaid("ashish");
+        consentTable.setConsentId("1234");
+        consentTable.setExpiryDate(date);
+
+        consentRepository.save(consentTable);
+
+    }   
+
+    @PostMapping("/deleteConsents")
+    public void deleteConsents() throws ParseException{
+        
+         //consentRepository.deleteByID(consentRepository.);
+        
+    }   
 
 }

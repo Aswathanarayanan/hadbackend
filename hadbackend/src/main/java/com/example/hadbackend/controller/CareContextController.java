@@ -90,4 +90,9 @@ public class CareContextController {
         return loginRepository.findAllByRole("doctor");
     }
 
+    @GetMapping("/getRecords")
+    public List<Medicalrecords> getRecords(@RequestParam String abhaid){
+        return medicalData.findByPatient(patientRepository.findPatientsById(abhaid));
+    }
+
 }
