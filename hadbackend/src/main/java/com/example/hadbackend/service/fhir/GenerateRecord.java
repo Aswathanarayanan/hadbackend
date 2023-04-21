@@ -1,12 +1,15 @@
 package com.example.hadbackend.service.fhir;
 
 //import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationResult;
 import com.example.hadbackend.bean.auth.Login;
 //import org.hl7.fhir.dstu2.model.*;
 //import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
 //import org.hl7.fhir.dstu2.model.Bundle.BundleType;
-
+//import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestIntent;
 import org.springframework.stereotype.Service;
@@ -32,24 +35,43 @@ public class GenerateRecord {
         Meta meta= (Meta) opdconsult.getMeta(); // type meta but itt id IBase type
         meta.setVersionId("1");
         meta.setLastUpdatedElement(new InstantType(formatter.format(date)));
-        meta.addProfile("https://nrces.in/ndhm/fh…efinition/DocumentBundle");
+        meta.addProfile("http://nrces.in/ndhm/fhir/r4/StructureDefinition/DocumentBundle");
 
         Coding coding= meta.addSecurity();
         coding.setCode("V");
         coding.setDisplay("very restricted");
-        coding.setSystem("https://terminology.hl7.org/5.1.0/CodeSystem-v3-Confidentiality.html");
+        coding.setSystem("http://terminology.hl7.org/CodeSystem/v3-Confidentiality");
 
         Identifier identifier= opdconsult.getIdentifier();
         identifier.setValue("305fecc2-4ba2-46cc-9ccd-efa755aff51d"); //check whether uuid
         identifier.setSystem("http://hip.in");
 
         opdconsult.setType(Bundle.BundleType.DOCUMENT);  // check this
-        //opdconsult.setTimestampElement //No function called setTimesst
+        opdconsult.setTimestampElement(new InstantType(formatter.format(date))); //No function called setTimesst
         List<Bundle.BundleEntryComponent> lb = opdconsult.getEntry();
         addentriestobundle(opdconsult,lb,patient,login,medicalrecords);
 
         return opdconsult;
     }
+
+    /**
+     * This method validates the FHIR resources
+     */
+//    public static boolean validate(IBaseResource resource)
+//    {
+//
+//        FhirInstanceValidator instanceValidator = new FhirInstanceValidator(supportChain);
+//        validator = ctx.newValidator().registerValidatorModule(instanceValidator);
+//        // Validate
+//        ValidationResult result = validator.validateWithResult(resource);
+//
+//        // The result object now contains the validation results
+//        for (SingleValidationMessage next : result.getMessages()) {
+//            System.out.println(next.getSeverity().name() + " : " + next.getLocationString() + " " + next.getMessage());
+//        }
+//
+//        return result.isSuccessful();
+//    }
     void addentriestobundle(Bundle op, List<Bundle.BundleEntryComponent> lb, com.example.hadbackend.bean.carecontext.Patient p, Login login, Medicalrecords medicalrecords) throws ParseException {
         Composition composition=new Composition();
         composition.setId(String.valueOf(new Random().nextInt(900)));
@@ -65,7 +87,7 @@ public class GenerateRecord {
         Meta meta=composition.getMeta();
         meta.setVersionId("1");
         meta.setLastUpdatedElement(new InstantType(formatter.format(date)));
-        meta.addProfile("https://nrces.in/ndhm/fh…finition/OPConsultRecord");
+        meta.addProfile("https://nrces.in/ndhm/fhir/r4/StructureDefinition/OPConsultRecord");
 
         composition.setLanguage("en-IN");
 
@@ -79,7 +101,7 @@ public class GenerateRecord {
 
         composition.setStatus(Composition.CompositionStatus.FINAL);
         composition.setDate(date); // how to add date
-        composition.setTitle("Restraint Summary");
+        composition.setTitle("Restraint Summary"); // not in ref ramya
 
         CodeableConcept type=composition.getType();
         Coding coding=new Coding();
@@ -95,9 +117,12 @@ public class GenerateRecord {
         Meta meta1=patient.getMeta();
         meta1.setVersionId("1");
         meta1.setLastUpdatedElement(new InstantType(formatter.format(date)));   //need to fix this
-        meta1.addProfile("https://nrces.in/ndhm/fh…uctureDefinition/Patient");
+        meta1.addProfile("https://nrces.in/ndhm/fhir/r4/StructureDefinition/Patient");
         patient.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("Patient Details");
 
+//        patient.addIdentifier().setType(
+//                new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/v2-0203", "MR", "Medical record number"))).
+//                setSystem("https://healthid.ndhm.gov.in").setValue(p.getPatientid().toString());
         Identifier identifier1=patient.addIdentifier();
         Coding coding1=new Coding();
         coding1.setDisplay("Medical record number");
@@ -105,7 +130,7 @@ public class GenerateRecord {
         coding1.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203");
         identifier1.setType(new CodeableConcept(coding1));
         identifier1.setSystem("https://healthid.ndhm.gov.in");
-        identifier1.setValue("22-7225-4829-5255");  //restrainsummery.getPatientId
+        identifier1.setValue(p.getPatientid().toString());  //restrainsummery.getPatientId
 
         patient.addName().setText(p.getName()); //getname fro patient in db
 
@@ -138,6 +163,8 @@ public class GenerateRecord {
         bundleEntryComponent1.setResource(patient);
         lb.add(bundleEntryComponent1); //addet to entry list
 
+        composition.setDateElement(new DateTimeType(new Date()));
+
         //Preactioner
 
         Practitioner practitioner = new Practitioner();
@@ -156,6 +183,8 @@ public class GenerateRecord {
         lb.add(bundleEntry4);
 
         composition.setTitle("OP consulatation");
+
+        //organisation
 
         Reference referenceCustodian = new Reference();
         referenceCustodian.setReference("Organization/Organization-01");
@@ -288,5 +317,35 @@ public class GenerateRecord {
         bundleEntry3.setFullUrl("MedicationRequest/"+medicationRequest.getId());
         bundleEntry3.setResource(medicationRequest);
         lb.add(bundleEntry3);
+
+
+//        Condition condition1 = new Condition();
+//        condition1.setId("Condition-"+new Random().nextInt(900));
+//        condition1.getMeta().addProfile("https://nrces.in/ndhm/fhir/r4/StructureDefinition/Condition");
+//        condition1.getText().setStatus(NarrativeStatus.GENERATED).setDivAsString( op.getProblemDescription());
+//        condition1.setSubject(new Reference(patientref));
+//        condition1.getCode().addCoding(new Coding("http://snomed.info/sct", op.getProblemDiagnosisCode(), op.getDiagnosticCertainity())).setText(op.getProblemDescription());
+//
+//        BundleEntryComponent bundleEntry1 = new BundleEntryComponent();
+//        bundleEntry1.setFullUrl("Condition/"+condition1.getId());
+//        bundleEntry1.setResource(condition1);
+//        lb.add(bundleEntry1);
+//
+//        for(int i=0 ; i<lb.size();i++)
+//        {
+//
+//            Bundle.BundleEntryComponent bec = lb.get(i);
+//            if(bec.getResource().getResourceType().toString().equalsIgnoreCase("Encounter"))
+//            {
+//                Encounter encounter = (Encounter)bec.getResource();
+//
+//                DiagnosisComponent dc =new DiagnosisComponent() ;
+//                dc.getCondition().setReference("Condition/"+condition1.getId());
+//
+//                encounter.addDiagnosis(dc);
+//
+//
+//            }
+//        }
     }
 }

@@ -10,6 +10,5 @@ import java.util.List;
 
 @Repository
 public interface ConsentRepository extends JpaRepository<ConsentTable,Integer> {
-
-    
+    List<ConsentTable> findAllByConsentId(String id);
 }

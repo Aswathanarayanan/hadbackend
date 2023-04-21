@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -54,5 +56,7 @@ public class Medicalrecords {
     @ManyToOne
     private Login doctor;
 
+    @Column
+    private Date date;
 
 }
