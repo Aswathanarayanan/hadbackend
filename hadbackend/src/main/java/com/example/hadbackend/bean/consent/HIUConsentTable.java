@@ -1,4 +1,4 @@
-package com.example.hadbackend.bean.request;
+package com.example.hadbackend.bean.consent;
 
 import java.util.Date;
 
@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Entity
-public class ConsentTable {
+public class HIUConsentTable {
     
     @Column
     @Id

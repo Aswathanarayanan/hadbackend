@@ -19,8 +19,8 @@ import lombok.Setter;
 public class ConsentDetail {
     private String consentId;
     private String createdAt;
-    private OnFetchConsentPurpose PurposeObject;
-    private ConsentPatient PatientObject;
+    private OnFetchConsentPurpose purpose;
+    private ConsentPatient patient;
     private OnFetchConsentConsentManager consentManager;
     private NotifyHIP hip;
     private ArrayList<String> hiTypes;

@@ -19,8 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.hadbackend.DAOimplement.ConsentRepository;
+import com.example.hadbackend.DAOimplement.HIPConsentRepository;
 import com.example.hadbackend.DAOimplement.MedicalData;
+import com.example.hadbackend.DAOimplement.PatientRepository;
 import com.example.hadbackend.bean.auth.Resp;
+import com.example.hadbackend.bean.consent.HIPConsentTable;
+import com.example.hadbackend.bean.consent.HIUConsentTable;
 import com.example.hadbackend.bean.consent.OnFetchConsent;
 import com.example.hadbackend.bean.request.CmRequest;
 import com.example.hadbackend.bean.request.CmRequestConsent;
@@ -28,7 +32,6 @@ import com.example.hadbackend.bean.request.CmRequestDateRange;
 import com.example.hadbackend.bean.request.CmRequestKeyMaterial;
 import com.example.hadbackend.bean.request.CmRequestdhPublicKey;
 import com.example.hadbackend.bean.request.CmRequesthiRequest;
-import com.example.hadbackend.bean.request.ConsentTable;
 import com.example.hadbackend.bean.request.HIPRequest;
 import com.example.hadbackend.bean.request.OnRequest;
 import com.example.hadbackend.bean.request.OnRequesthiRequest;
@@ -36,7 +39,8 @@ import com.example.hadbackend.bean.security.KeyGenerator;
 import com.example.hadbackend.bean.security.KeyMaterial;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.example.hadbackend.bean.carecontext.Medicalrecords;
+import com.example.hadbackend.bean.carecontext.Patient;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -49,6 +53,15 @@ public class RequestController {
     
     @Autowired
     ConsentRepository consentRepository;
+
+    @Autowired
+    HIPConsentRepository hipconsentRepository;
+
+    @Autowired 
+    PatientRepository patientRepository;
+
+    @Autowired
+    MedicalData medicalData;
 
     FetchModeController fetchModeController=new FetchModeController();
 
@@ -73,28 +86,49 @@ public class RequestController {
         //Store this data in DB
 
         String expDate = onFetchConsent.getConsent().getConsentDetail().getPermission().getDataEraseAt();
+        String fromDate = onFetchConsent.getConsent().getConsentDetail().getPermission().getDateRange().getFrom();
+        String toDate = onFetchConsent.getConsent().getConsentDetail().getPermission().getDateRange().getTo();
       
+        HIUConsentTable consentTable = new HIUConsentTable();
+
         String strPattern = "\\d{4}-\\d{2}-\\d{2}";
-        
+         
         Pattern pattern = Pattern.compile(strPattern);
         Matcher matcher = pattern.matcher(expDate);
-        
+         
         Date date = new Date();
-
-        while( matcher.find() ) {
-            System.out.println( matcher.group());
+ 
+        while(matcher.find()){
+            System.out.println(matcher.group());
             date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
         }
-       
-        ConsentTable consentTable = new ConsentTable();
-        
-        consentTable.setAbhaid(onFetchConsent.getConsent().getConsentDetail().getPatient().getId());
-        consentTable.setConsentId(consentID);
+
         consentTable.setExpiryDate(date);
 
+        matcher = pattern.matcher(fromDate);
+         
+        while(matcher.find()) {
+            System.out.println(matcher.group());
+            date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+        }
+        
+        consentTable.setDateFrom(date);
+
+        matcher = pattern.matcher(toDate);
+         
+        while(matcher.find()) {
+            System.out.println(matcher.group());
+            date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+        }
+        
+        consentTable.setDateTo(date);
+
+        consentTable.setAbhaid(onFetchConsent.getConsent().getConsentDetail().getPatient().getId());
+        consentTable.setConsentId(consentID);
+        
         consentRepository.save(consentTable);
 
-        System.out.println("Consent Artifact saved in DB");
+        System.out.println("Consent Artifact saved in HIU table DB");
 
         //cm/request
 
@@ -240,16 +274,32 @@ public class RequestController {
         System.out.println("Sending Data ......");
 
         if(flag==0){
-
             flag=1;
             String consent = hipRequest.getHiRequest().getConsent().getId();
             
-            
+            List<HIPConsentTable> consentTable = hipconsentRepository.findAllByConsentId(consent);
 
+            for(int i=0;i<consentTable.size();i++)
+            {
+                HIPConsentTable row = consentTable.get(i);
+                
+                String abhaid = row.getAbhaid();
 
-            System.out.println("IN Data");
+                Patient patient = patientRepository.findPatientsById(abhaid);
 
+                List<Medicalrecords> listData = medicalData.findAllByPatientAndDateBetween(patient, row.getDateFrom(), row.getDateTo());
+                
+                for(int j=0;j<listData.size();j++)
+                {
+                    Medicalrecords cur = listData.get(i);
+                    System.out.println(cur.getPrescription());
+                }
+
+                System.out.println("IN Data");
+            }
         }
+
+        flag=0;
 
     }
 
@@ -271,7 +321,7 @@ public class RequestController {
         }
         // Date date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group(1));
 
-        ConsentTable consentTable = new ConsentTable();
+        HIUConsentTable consentTable = new HIUConsentTable();
         consentTable.setAbhaid("ashish");
         consentTable.setConsentId("1234");
         consentTable.setExpiryDate(date);
