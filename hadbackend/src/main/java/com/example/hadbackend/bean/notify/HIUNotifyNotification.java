@@ -1,7 +1,6 @@
 package com.example.hadbackend.bean.notify;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.example.hadbackend.bean.consent.OnConsentRequestID;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

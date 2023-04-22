@@ -1,6 +1,7 @@
 package com.example.hadbackend.controller;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.hadbackend.DAOimplement.ConsentRepository;
+import com.example.hadbackend.DAOimplement.HIPConsentRepository;
 import com.example.hadbackend.DAOimplement.MedicalData;
 import com.example.hadbackend.DAOimplement.PatientRepository;
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
@@ -58,6 +61,12 @@ public class ConsentController {
 
     @Autowired
     PatientRepository patientRepository;
+
+    @Autowired
+    ConsentRepository consentRepository;
+
+    @Autowired 
+    HIPConsentRepository hipConsentRepository;
 
     @PostMapping("/generateconsent")
     public void generateConsent(@RequestBody ConsentRequestFromFrontend consentRequestFromFrontend) throws JsonProcessingException{
@@ -161,4 +170,16 @@ public class ConsentController {
         return medicalData.findByPatient(patientRepository.findPatientsById(abhaid));
     }
 
+
+    @PostMapping("/deleteexpiredconsent")
+    public void removeoldconsents() throws ParseException{
+        Date date = new Date();
+        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
+        String asISO= dateFormat.format(date);
+        System.out.println(asISO);
+        Date curdate = dateFormat.parse(asISO);
+        System.out.println(curdate);
+        consentRepository.deleteAllByExpiryDateBefore(curdate);
+        hipConsentRepository.deleteAllByExpiryDateBefore(curdate);
+    }
 }
