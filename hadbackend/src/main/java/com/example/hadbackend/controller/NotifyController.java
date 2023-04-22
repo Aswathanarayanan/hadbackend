@@ -162,43 +162,48 @@ public class NotifyController {
     @PostMapping("/v0.5/consents/hiu/notify")
     public void consentHIUNotify(@RequestBody HIUNotify root) throws JsonProcessingException{
         
-        FetchConsent fetchConsent=new FetchConsent();
-        
-        System.out.println("---------"+root.getRequestId());
+        System.out.println("Received HIP Notify with status - "+root.getNotification().getStatus());
 
-        ArrayList<OnConsentRequestID> consentIDList = root.getNotification().getConsentArtefacts();
-
-        for(int i=0;i<consentIDList.size();i++)
-        {
-            token =fetchModeController.getsession();
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setAccept(Collections.singletonList(MediaType.ALL));
-            headers.add("X-CM-ID","sbx");
-            headers.add("Authorization",token);
+        String stat = root.getNotification().getStatus();
+        if(stat.equals("GRANTED")){
+            FetchConsent fetchConsent=new FetchConsent();
             
-            fetchConsent.setConsentId(consentIDList.get(i).getId());
+            System.out.println("---------"+root.getRequestId());
 
-            UUID uuid2 = UUID.randomUUID();
-            String randomUUIDString2 = uuid2.toString();
-            
-            TimeZone timeZone2=TimeZone.getTimeZone("UTC");
-            DateFormat dateFormat2 = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.SSSSSS");
-            dateFormat2.setTimeZone(timeZone2);
-            String asISO2= dateFormat2.format(new Date());
+            ArrayList<OnConsentRequestID> consentIDList = root.getNotification().getConsentArtefacts();
 
-            fetchConsent.setRequestId(randomUUIDString2);
-            fetchConsent.setTimestamp(asISO2);
-
-            String curr_body2=new ObjectMapper().writeValueAsString(fetchConsent);
-            HttpEntity<String> httpEntity2 = new HttpEntity<>(curr_body2, headers);
+            for(int i=0;i<consentIDList.size();i++)
+            {
+                token =fetchModeController.getsession();
+                RestTemplate restTemplate = new RestTemplate();
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setAccept(Collections.singletonList(MediaType.ALL));
+                headers.add("X-CM-ID","sbx");
+                headers.add("Authorization",token);
                 
-            System.out.println("Calling Fetch Consent");
+                fetchConsent.setConsentId(consentIDList.get(i).getId());
 
-            ResponseEntity<Object> objectResponseEntity2=restTemplate.exchange("https://dev.abdm.gov.in/gateway/v0.5/consents/fetch", HttpMethod.POST, httpEntity2,Object.class);
+                UUID uuid2 = UUID.randomUUID();
+                String randomUUIDString2 = uuid2.toString();
+                
+                TimeZone timeZone2=TimeZone.getTimeZone("UTC");
+                DateFormat dateFormat2 = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.SSSSSS");
+                dateFormat2.setTimeZone(timeZone2);
+                String asISO2= dateFormat2.format(new Date());
 
-            System.out.println(objectResponseEntity2.getStatusCode());
+                fetchConsent.setRequestId(randomUUIDString2);
+                fetchConsent.setTimestamp(asISO2);
+
+                String curr_body2=new ObjectMapper().writeValueAsString(fetchConsent);
+                HttpEntity<String> httpEntity2 = new HttpEntity<>(curr_body2, headers);
+                    
+                System.out.println("Calling Fetch Consent");
+
+                ResponseEntity<Object> objectResponseEntity2=restTemplate.exchange("https://dev.abdm.gov.in/gateway/v0.5/consents/fetch", HttpMethod.POST, httpEntity2,Object.class);
+
+                System.out.println(objectResponseEntity2.getStatusCode());
+            }
         }
     }
 
