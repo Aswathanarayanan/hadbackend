@@ -107,7 +107,6 @@ public class NotifyController {
             
             consentTable.setAbhaid(root.getNotification().getConsentDetail().getPatient().getId());
             consentTable.setConsentId(consentID);
-            
             hipConsentRepository.save(consentTable);
     
             System.out.println("Consent Artifact saved in HIP DB");

@@ -35,4 +35,7 @@ public class HIPConsentTable {
     @Column
     private Date dateTo;
 
+    @Column
+    private String transactionId;
+
 }
