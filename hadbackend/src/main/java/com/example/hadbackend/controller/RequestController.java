@@ -7,6 +7,23 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import com.amazonaws.services.dynamodbv2.xspec.S;
+import com.example.hadbackend.bean.auth.FetchModeRequest;
+import com.example.hadbackend.bean.dataTransfer.DataEntries;
+import com.example.hadbackend.bean.dataTransfer.DataPush;
+import com.example.hadbackend.security.dercyprion.DecryptionController;
+import com.example.hadbackend.security.dercyprion.DecryptionRequest;
+import com.example.hadbackend.security.dercyprion.DecryptionResponse;
+import com.example.hadbackend.security.keys.*;
+import com.example.hadbackend.security.keys.KeyMaterial;
+import com.example.hadbackend.service.fhir.OPConsult;
+import com.example.hadbackend.service.fhir.OPconsultation;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import lombok.SneakyThrows;
+import org.hl7.fhir.r4.model.Bundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -35,21 +52,25 @@ import com.example.hadbackend.bean.request.CmRequesthiRequest;
 import com.example.hadbackend.bean.request.HIPRequest;
 import com.example.hadbackend.bean.request.OnRequest;
 import com.example.hadbackend.bean.request.OnRequesthiRequest;
-import com.example.hadbackend.bean.security.KeyGenerator;
-import com.example.hadbackend.bean.security.KeyMaterial;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
 import com.example.hadbackend.bean.carecontext.Patient;
+import com.example.hadbackend.security.encryotion.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import reactor.core.publisher.Mono;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @RestController
 public class RequestController {
+
+    WebClient webClient=WebClient.create();
     
     @Autowired
     ConsentRepository consentRepository;
@@ -57,16 +78,25 @@ public class RequestController {
     @Autowired
     HIPConsentRepository hipconsentRepository;
 
-    @Autowired 
+    @Autowired
     PatientRepository patientRepository;
 
     @Autowired
     MedicalData medicalData;
 
+    @Autowired
+    OPconsultation opConsultion;
+
+    @Autowired
+    EncryptionController encryptionController;
+
+    @Autowired
+    DecryptionController decryptionController;
     FetchModeController fetchModeController=new FetchModeController();
 
     String token;
 
+    String hiupublicKey,hiuprivateKey,hiunonce;
     int flag=0;
     
     @PostMapping("/v0.5/consents/on-fetch")
@@ -88,16 +118,16 @@ public class RequestController {
         String expDate = onFetchConsent.getConsent().getConsentDetail().getPermission().getDataEraseAt();
         String fromDate = onFetchConsent.getConsent().getConsentDetail().getPermission().getDateRange().getFrom();
         String toDate = onFetchConsent.getConsent().getConsentDetail().getPermission().getDateRange().getTo();
-      
+
         HIUConsentTable consentTable = new HIUConsentTable();
 
         String strPattern = "\\d{4}-\\d{2}-\\d{2}";
-         
+
         Pattern pattern = Pattern.compile(strPattern);
         Matcher matcher = pattern.matcher(expDate);
-         
+
         Date date = new Date();
- 
+
         while(matcher.find()){
             System.out.println(matcher.group());
             date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
@@ -106,7 +136,7 @@ public class RequestController {
         consentTable.setExpiryDate(date);
 
         matcher = pattern.matcher(fromDate);
-         
+
         while(matcher.find()) {
             System.out.println(matcher.group());
             date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
@@ -115,17 +145,17 @@ public class RequestController {
         consentTable.setDateFrom(date);
 
         matcher = pattern.matcher(toDate);
-         
+
         while(matcher.find()) {
             System.out.println(matcher.group());
             date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
         }
-        
+
         consentTable.setDateTo(date);
 
         consentTable.setAbhaid(onFetchConsent.getConsent().getConsentDetail().getPatient().getId());
         consentTable.setConsentId(consentID);
-        
+
         consentRepository.save(consentTable);
 
         System.out.println("Consent Artifact saved in HIU table DB");
@@ -156,7 +186,7 @@ public class RequestController {
         hiRequest.setDateRange(cmRequestDateRange);
 
         //Change URL (NGROK)
-        hiRequest.setDataPushUrl("https://ea9c-103-156-19-229.in.ngrok.io");
+        hiRequest.setDataPushUrl("https://c90c-103-156-19-229.ngrok-free.app/gethipdata");
 
         CmRequestKeyMaterial cmRequestKeyMaterial = new CmRequestKeyMaterial();
         cmRequestKeyMaterial.setCryptoAlg("ECDH");
@@ -165,26 +195,24 @@ public class RequestController {
         CmRequestdhPublicKey cmRequestdhPublicKey = new CmRequestdhPublicKey();
 
         System.out.println("\nGenerating Keys");
-        
-        KeyGenerator keyGenerator = new KeyGenerator();
+
+        KeysController keyGenerator = new KeysController();
         
         KeyMaterial receiverKeys = keyGenerator.generate();
 
-        String publicKey = receiverKeys.getPublicKey();
-
-        System.out.println("Public Key - "+publicKey);
-        //String privateKey = receiverKeys.getPrivateKey();
-
-        String nonce = receiverKeys.getNonce();
-
-        System.out.println("Nonce - "+nonce);
+        hiupublicKey = receiverKeys.getPublicKey();
+        System.out.println("Public Key hiu- "+hiupublicKey);
+        hiuprivateKey = receiverKeys.getPrivateKey();
+        System.out.println("Private Key hiu- "+hiuprivateKey);
+        hiunonce = receiverKeys.getNonce();
+        System.out.println("Nonce hiu- "+hiunonce);
 
         cmRequestdhPublicKey.setExpiry("2023-04-15T12:52:34.925");  //HardCoded for Now
-        cmRequestdhPublicKey.setKeyValue(publicKey);
-        cmRequestdhPublicKey.setParameters("Curve25519/32byte random key");
+        cmRequestdhPublicKey.setKeyValue(hiupublicKey);
+        cmRequestdhPublicKey.setParameters("Ephemeral public key");
 
         cmRequestKeyMaterial.setDhPublicKey(cmRequestdhPublicKey);
-        cmRequestKeyMaterial.setNonce(nonce);
+        cmRequestKeyMaterial.setNonce(hiunonce);
 
         hiRequest.setKeyMaterial(cmRequestKeyMaterial);
 
@@ -217,6 +245,7 @@ public class RequestController {
     }
 
 
+    @SneakyThrows
     @PostMapping("/v0.5/health-information/hip/request")
     public void cmHIPRequest(@RequestBody HIPRequest hipRequest) throws JsonProcessingException{
 
@@ -282,20 +311,96 @@ public class RequestController {
             for(int i=0;i<consentTable.size();i++)
             {
                 HIPConsentTable row = consentTable.get(i);
-                
+
                 String abhaid = row.getAbhaid();
 
                 Patient patient = patientRepository.findPatientsById(abhaid);
 
                 List<Medicalrecords> listData = medicalData.findAllByPatientAndDateBetween(patient, row.getDateFrom(), row.getDateTo());
-                
+
+                //hip keygen
+                String hiupublicK = hipRequest.getHiRequest().getKeyMaterial().getDhPublicKey().getKeyValue();
+                String hiunonce = hipRequest.getHiRequest().getKeyMaterial().getNonce();
+                KeysController keyGenerator = new KeysController();
+
+                KeyMaterial receiverKeys = keyGenerator.generate();
+
+                String hippublicKey = receiverKeys.getPublicKey();
+
+                System.out.println("Public Key hip - "+hippublicKey);
+                String hipprivateKey = receiverKeys.getPrivateKey();
+                System.out.println("Private Key hip - "+hipprivateKey);
+                String hipnonce = receiverKeys.getNonce();
+
+                System.out.println("Nonce hip - "+hipnonce);
+
+                EncryptionResponse encryptionResponse=new EncryptionResponse();
+                ArrayList<DataEntries>dataEntries = new ArrayList<>();
+                //encrypt every records
                 for(int j=0;j<listData.size();j++)
                 {
                     Medicalrecords cur = listData.get(i);
-                    System.out.println(cur.getPrescription());
+                    //bundle creation
+                    Bundle records= opConsultion.bundleoutput(cur);
+
+                    FhirContext ctx = FhirContext.forR4();
+                    IParser parser;
+                    parser = ctx.newJsonParser();
+                    parser.setPrettyPrint(true);
+
+                    // Serialize populated bundle
+                    String  toencryptbundle= parser.encodeResourceToString(records);
+
+                    System.out.println(toencryptbundle);
+                    //encrypt
+                    EncryptionRequest encryptionRequest=new EncryptionRequest();
+                    encryptionRequest.setPlainTextData(toencryptbundle);
+                    encryptionRequest.setReceiverNonce(hiunonce);
+                    encryptionRequest.setReceiverPublicKey(hiupublicK);
+                    encryptionRequest.setSenderPublicKey(hippublicKey);
+                    encryptionRequest.setSenderPrivateKey(hipprivateKey);
+                    encryptionRequest.setSenderNonce(hipnonce);
+
+                    encryptionResponse=encryptionController.encrypt(encryptionRequest);
+
+                    DataEntries dataEntries1=new DataEntries();
+                    dataEntries1.setMedia("application/fhir+json");
+                    dataEntries1.setCareContextReference(cur.getVistid());
+                    dataEntries1.setChecksum("1234");
+                    dataEntries1.setContent(encryptionResponse.getEncryptedData());
+
+                    dataEntries.add(dataEntries1);
+
+                    System.out.println(cur.getMedicine());
                 }
 
-                System.out.println("IN Data");
+                DataPush dataPush=new DataPush();
+                dataPush.setPageNumber(0);
+                dataPush.setPageNumber(1);
+                dataPush.setTransactionId(hipRequest.getTransactionId());
+                dataPush.setEntries(dataEntries);
+                CmRequestKeyMaterial keyMaterial=new CmRequestKeyMaterial();
+                keyMaterial.setNonce(hipnonce);
+                keyMaterial.setCryptoAlg("ECDH");
+                keyMaterial.setCurve("Curve25519");
+                keyMaterial.setDhPublicKey(hipRequest.getHiRequest().getKeyMaterial().getDhPublicKey());
+                keyMaterial.getDhPublicKey().setKeyValue(encryptionResponse.getKeyToShare());
+
+                dataPush.setKeyMaterial(keyMaterial);
+
+                System.out.println(dataPush.getKeyMaterial().getDhPublicKey().getParameters());
+                //Sending Data
+//                String curr_body1=new ObjectMapper().writeValueAsString(dataPush);
+//                HttpEntity<String> httpEntity1 = new HttpEntity<>(curr_body1);
+
+                String objectResponseEntity1=restTemplate.postForObject(hipRequest.getHiRequest().getDataPushUrl(),dataPush,String.class);
+                System.out.println(objectResponseEntity1);
+//                Mono<Object> res = webClient.post()
+//                        .uri(hipRequest.getHiRequest().getDataPushUrl())
+//                        .contentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
+//                        .body(Mono.just(dataPush), DataPush.class)
+//                        .retrieve().bodyToMono(Object.class);
+                System.out.println("Data transfer");
             }
         }
 
@@ -335,6 +440,28 @@ public class RequestController {
         
          //consentRepository.deleteByID(consentRepository.);
         
-    }   
+    }
+
+    @SneakyThrows
+    @PostMapping(value = "/gethipdata")
+    public String transferredData(@RequestBody DataPush data){
+
+        System.out.println("----------RECIEVED DATA BY HIU---------");
+        System.out.println(data.getTransactionId());
+        System.out.println(data.getEntries().get(0).getContent());
+
+        String hippublickey=data.getKeyMaterial().getDhPublicKey().getKeyValue();
+        String hipnonce=data.getKeyMaterial().getNonce();
+        List<String> medicalrecords=new ArrayList<>();
+        for (DataEntries rec: data.getEntries()) {
+                String cur=rec.getContent();
+            DecryptionRequest decryptionRequest=new DecryptionRequest(hiuprivateKey,hiunonce,hippublickey,hipnonce,cur);
+            DecryptionResponse decryptionResponse= decryptionController.decrypt(decryptionRequest);
+                medicalrecords.add(decryptionResponse.getDecryptedData());
+        }
+        System.out.println(medicalrecords.get(0));
+
+        return "Success-datatransfer";
+    }
 
 }

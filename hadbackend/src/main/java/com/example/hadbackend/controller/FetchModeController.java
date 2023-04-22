@@ -366,6 +366,9 @@ public class FetchModeController {
 
     @PostMapping("/savedata")
     public void saveData(@RequestParam String email , @RequestParam String abhaid, @RequestBody Medicalrecords medicalrecords) throws JsonProcessingException {
+
+        Date date = new Date(System.currentTimeMillis());
+
         Login doctor = loginRepository.findAllByEmail(email);
         Patient patient = patientRepository.findPatientsById(abhaid);
         System.out.println(doctor.getEmail());
@@ -374,6 +377,7 @@ public class FetchModeController {
         medicalrecords.setDoctor(doctor);
         medicalrecords.setPatient(patient);
         medicalrecords.setVistid(patient.getVisitid());
+        medicalrecords.setDate(date);
         medicalData.save(medicalrecords);
 
         // medicalrecords=

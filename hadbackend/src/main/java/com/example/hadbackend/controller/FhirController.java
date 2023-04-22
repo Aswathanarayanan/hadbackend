@@ -28,17 +28,18 @@ public class FhirController {
     LoginRepository loginRepository;
 
     @PostMapping("/bundlerecords")
-    Bundle bundlerecords(@RequestParam String abhaid, @RequestParam String doctorid, @RequestBody Medicalrecords medicalrecords) throws ParseException, IOException {
+    void bundlerecords(@RequestParam String abhaid, @RequestParam String doctorid, @RequestBody Medicalrecords medicalrecords) throws ParseException, IOException {
 //        Patient patient= patientRepository.findPatientsById(abhaid);
 //        Login login=loginRepository.findAllByEmail(doctorid);
 //        GenerateRecord generateRecord=new GenerateRecord();
 //        Bundle records=generateRecord.createmedicalrecords(patient,login,medicalrecords);
-        OPConsult opConsult=new OPConsult();
-        Bundle records=opConsult.genereateoprecord();
-//        medicalrecords.setPatient(patientRepository.findPatientsById(abhaid));
-//        medicalrecords.setDoctor(loginRepository.findAllByEmail(doctorid));
-//        OPconsultation oPconsultation=new OPconsultation();
+//        OPConsult opConsult=new OPConsult();
+//        Bundle records=opConsult.genereateoprecord();
+        medicalrecords.setPatient(patientRepository.findPatientsById(abhaid));
+        medicalrecords.setDoctor(loginRepository.findAllByEmail(doctorid));
+        OPconsultation oPconsultation=new OPconsultation();
+        oPconsultation.bundleoutput(medicalrecords);
 //        Bundle records=oPconsultation.populateOPConsultNoteBundle(medicalrecords,null);
-        return records;
+        //return records;
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.security.Security;
+
 @SpringBootApplication
 public class HadbackendApplication {
 
@@ -30,6 +32,7 @@ public class HadbackendApplication {
 //        return this.accesstoken;
 //    }
     public static void main(String[] args) {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         SpringApplication.run(HadbackendApplication.class, args);
     }
 

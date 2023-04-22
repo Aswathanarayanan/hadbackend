@@ -1,17 +1,11 @@
 package com.example.hadbackend.service.fhir;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.net.URL;
+import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
+import lombok.SneakyThrows;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -55,7 +49,9 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.springframework.stereotype.Service;
 
+@Service
 public class OPconsultation {
     static FhirContext ctx = FhirContext.forR4();
 
@@ -67,7 +63,42 @@ public class OPconsultation {
         init();
     }
 
+    @SneakyThrows
+    public Bundle bundleoutput(Medicalrecords medicalrecords){
+        Bundle OPConsultNoteBundle=populateOPConsultNoteBundle(medicalrecords,null);
 
+        // Instantiate a new parser
+        IParser parser;
+
+        // Enter file path (Eg: C://generatedexamples//bundle-prescriptionrecord.json)
+        // Depending on file type xml/json instantiate the parser
+        File file;
+        String filePath = "./bundle.json";
+//        if(FilenameUtils.getExtension(filePath).equals("json"))
+//        {
+            parser = ctx.newJsonParser();
+        //}
+//        else if(FilenameUtils.getExtension(filePath).equals("xml"))
+//        {
+//            parser = ctx.newXmlParser();
+//        }
+
+        // Indent the output
+        parser.setPrettyPrint(true);
+
+        // Serialize populated bundle
+        String serializeBundle = parser.encodeResourceToString(OPConsultNoteBundle);
+
+        // Write serialized bundle in xml/json file
+        file = new File(filePath);
+        file.createNewFile();
+        FileWriter writer = new FileWriter(file);
+        writer.write(serializeBundle);
+        writer.flush();
+        writer.close();
+
+        return OPConsultNoteBundle;
+    }
     public Bundle populateOPConsultNoteBundle(Medicalrecords medicalrecords, Bundle req)
     {
 

@@ -56,4 +56,5 @@ public class Medicalrecords {
     @ManyToOne
     private Login doctor;
 
+
 }
