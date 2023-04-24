@@ -27,13 +27,13 @@ public class HIPConsentTable {
     private String abhaid;
 
     @Column
-    private Date expiryDate;
+    private String expiryDate;
 
     @Column
-    private Date dateFrom;
+    private String dateFrom;
 
     @Column
-    private Date dateTo;
+    private String dateTo;
 
     @Column
     private String transactionId;

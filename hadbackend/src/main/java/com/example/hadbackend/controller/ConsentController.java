@@ -134,12 +134,12 @@ public class ConsentController {
             
             ConsentDateRange consentDateRange=new ConsentDateRange();
             
-            consentDateRange.setFrom(consentRequestFromFrontend.getDateFrom()+"T12:52:34.925Z");
-            consentDateRange.setTo(consentRequestFromFrontend.getDateTo()+"T12:52:34.925Z");
+            consentDateRange.setFrom(consentRequestFromFrontend.getDateFrom());
+            consentDateRange.setTo(consentRequestFromFrontend.getDateTo());
             
             consentPermission.setDateRange(consentDateRange);
 
-            consentPermission.setDataEraseAt(consentRequestFromFrontend.getExpirayDate()+"T12:52:34.925Z");
+            consentPermission.setDataEraseAt(consentRequestFromFrontend.getExpiryDate());
             
             ConsentFrequency consentFrequency=new ConsentFrequency();
             consentFrequency.setUnit("HOUR");

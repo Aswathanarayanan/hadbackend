@@ -16,7 +16,7 @@ public class ConsentRequestFromFrontend {
     private String abhaid;
     private String dateFrom;
     private String dateTo;
-    private String expirayDate;
+    private String expiryDate;
     private String purpose;
     private String docName;
     

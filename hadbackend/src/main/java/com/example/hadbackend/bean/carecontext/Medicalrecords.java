@@ -27,9 +27,6 @@ public class Medicalrecords {
     private String vistid;
 
     @Column
-    private String prescription;
-
-    @Column
     private String symptoms;
 
     @Column

@@ -1,6 +1,8 @@
-package com.example.hadbackend.bean.consent;
+package com.example.hadbackend.bean.dataTransfer;
 
 import java.util.Date;
+
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import jakarta.persistence.*;
@@ -12,8 +14,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@Service
 @Entity
-public class HIUConsentTable {
+public class TransferedData {
     
     @Column
     @Id
@@ -21,21 +24,27 @@ public class HIUConsentTable {
     private int id;
 
     @Column
-    private String consentId;
+    private String consentID;
 
     @Column
     private String abhaid;
 
     @Column
-    private String expiryDate;
+    private String symptoms;
 
     @Column
-    private String dateFrom;
+    private String medicine;
 
     @Column
-    private String dateTo;
+    private String dosage;
 
     @Column
-    private String transactionId;
+    private String pattern;
 
+    @Column
+    private String timings;
+
+    @Column
+    private String instruction;
+    
 }
