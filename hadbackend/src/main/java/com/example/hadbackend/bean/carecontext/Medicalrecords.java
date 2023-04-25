@@ -45,7 +45,7 @@ public class Medicalrecords {
     private String instruction;
 
     @Column
-    private Date date; //java util or java sql
+    private String date; //java util or java sql
 
     @ManyToOne
     private Patient patient;

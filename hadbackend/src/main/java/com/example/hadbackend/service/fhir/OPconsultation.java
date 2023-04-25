@@ -1,6 +1,7 @@
 package com.example.hadbackend.service.fhir;
 
 import java.io.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -58,6 +59,9 @@ public class OPconsultation {
     static FhirInstanceValidator instanceValidator;
     static FhirValidator validator;
 
+    SimpleDateFormat formatter1= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+
     public OPconsultation() throws DataFormatException, FileNotFoundException
     {
         init();
@@ -99,12 +103,13 @@ public class OPconsultation {
 
         return OPConsultNoteBundle;
     }
-    public Bundle populateOPConsultNoteBundle(Medicalrecords medicalrecords, Bundle req)
+    public Bundle populateOPConsultNoteBundle(Medicalrecords medicalrecords, Bundle req) throws ParseException
     {
 
         System.out.println("creating bundle");
 
         SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        
         Date date = new Date(System.currentTimeMillis());
 
         Bundle opCounsultNoteBundle=new Bundle();
@@ -130,7 +135,7 @@ public class OPconsultation {
             opCounsultNoteBundle.setType(BundleType.DOCUMENT);
 
 
-            opCounsultNoteBundle.setTimestampElement(new InstantType(medicalrecords.getDate()));
+            opCounsultNoteBundle.setTimestampElement(new InstantType(formatter1.parse(medicalrecords.getDate())));
 
             // Add resources entries for bundle with Full URL
             List<BundleEntryComponent> listBundleEntries = opCounsultNoteBundle.getEntry();
@@ -177,7 +182,7 @@ public class OPconsultation {
 //
 //        URL Url = getClass().getClassLoader().getResource(resourceFolderName);
 //        String baseFilePath = Url.getPath();
-        String baseFilePath="/home/aswathanarayanan/HAD/definitions.json";
+        String baseFilePath="src\\main\\java\\com\\example\\hadbackend\\fhirprofilesjson\\k";
         File dir=new File(baseFilePath);
         FileFilter fileFilter=new WildcardFileFilter("*.json");
         File[] files = dir.listFiles(fileFilter);
@@ -232,7 +237,7 @@ public class OPconsultation {
         return result.isSuccessful();
     }
 
-    public Composition populateOPConsultNoteCompositionResource(Medicalrecords medicalrecords , Composition comp, List<BundleEntryComponent> lb)
+    public Composition populateOPConsultNoteCompositionResource(Medicalrecords medicalrecords , Composition comp, List<BundleEntryComponent> lb) throws ParseException
     {
 
         SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -284,7 +289,7 @@ public class OPconsultation {
         // Status can be preliminary | final | amended | entered-in-error
         composition.setStatus(CompositionStatus.FINAL);
 
-        composition.setDate((medicalrecords.getDate()));
+        composition.setDate(formatter1.parse(medicalrecords.getDate()));
 
         // Kind of composition ("Clinical consultation report")
         CodeableConcept type = composition.getType();
@@ -370,7 +375,7 @@ public class OPconsultation {
             en.setId("Encounter-"+new Random().nextInt(999));
             en.setStatus(EncounterStatus.FINISHED);
             Meta meta2=en.getMeta();
-            meta2.setLastUpdatedElement(new InstantType(medicalrecords.getDate()));
+            meta2.setLastUpdatedElement(new InstantType(formatter1.parse(medicalrecords.getDate())));
             meta2.addProfile("https://nrces.in/ndhm/fhir/r4/StructureDefinition/Encounter");
             en.getIdentifier().add(new Identifier().setSystem("https://ndhm.in").setValue("iiitbteam18"));
             en.setClass_(new Coding("http://terminology.hl7.org/CodeSystem/v3-ActCode", "IMP", "inpatient encounter"));
@@ -480,7 +485,7 @@ public class OPconsultation {
             medicationRequest.setIntent(MedicationRequestIntent.ORDER);
             medicationRequest.setMedication(new CodeableConcept().setText(medicalrecords.getMedicine()));
             medicationRequest.setSubject(new Reference().setReference(patientref));
-            medicationRequest.setAuthoredOnElement(new DateTimeType(medicalrecords.getDate()));
+            medicationRequest.setAuthoredOnElement(new DateTimeType(formatter1.parse(medicalrecords.getDate())));
             medicationRequest.setRequester(new Reference().setReference("Practitioner/Practitioner-01").setDisplay(medicalrecords.getDoctor().getName()));
             medicationRequest.getReasonReference().add(new Reference().setReference("Condition/Condition-01"));
             medicationRequest.addDosageInstruction(new Dosage().setText("One tablet at once").addAdditionalInstruction(new CodeableConcept().setText(medicalrecords.getTimings())).

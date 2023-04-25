@@ -34,10 +34,18 @@ public class DataTransferController {
     TransferedDataRepository transferedDataRepository;
 
     @GetMapping("/gettransfereddata")
-    public List<TransferedData> getTransferedData(@RequestParam String abhaid,@RequestParam String dateFrom, @RequestParam String dateTo){
+    public List<TransferedData> getTransferedData(@RequestParam String abhaid,@RequestParam String consentid){
+
+        List<TransferedData> transferedDataList = transferedDataRepository.getTransferedData(abhaid, consentid);
+        return transferedDataList;
+
+    }
+
+    @GetMapping("/getrecenttransfereddata")
+    public List<TransferedData> getRecentTransferedData(@RequestParam String abhaid,@RequestParam String dateFrom, @RequestParam String dateTo){
 
         List<String> consentID = consentRepository.getConsentIDFromDate(dateFrom, dateTo);
-        List<TransferedData> transferedDataList = transferedDataRepository.getTransferedData(abhaid, consentID.get(0));
+        List<TransferedData> transferedDataList = transferedDataRepository.getTransferedData(abhaid, consentID.get(consentID.size()-1));
         return transferedDataList;
     }
 
