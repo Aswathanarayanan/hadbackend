@@ -28,6 +28,7 @@ import lombok.SneakyThrows;
 
 import org.apache.tomcat.util.json.JSONParser;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -205,7 +206,7 @@ public class RequestController {
         hiRequest.setDateRange(cmRequestDateRange);
 
         //Change URL (NGROK)
-        hiRequest.setDataPushUrl("https://9109-103-156-19-229.ngrok-free.app/gethipdata");
+        hiRequest.setDataPushUrl("https://f52c-103-156-19-229.ngrok-free.app/gethipdata");
 
         CmRequestKeyMaterial cmRequestKeyMaterial = new CmRequestKeyMaterial();
         cmRequestKeyMaterial.setCryptoAlg("ECDH");
@@ -549,6 +550,9 @@ public class RequestController {
 
                 //Save Transferred Data in DB
 
+                ObjectMapper objectMapper = new ObjectMapper();
+                Bundle myObject = objectMapper.readValue(decryptionResponse.getDecryptedData(), Bundle.class);
+
                 TransferedData transferedData = new TransferedData();
                 List<String> curConsent = consentRepository.getConsentID(data.getTransactionId());
                 transferedData.setConsentID(curConsent.get(0));
@@ -556,12 +560,13 @@ public class RequestController {
                 List<String> abha = consentRepository.getAbhaID(data.getTransactionId());
                 transferedData.setAbhaid(abha.get(0));
 
-                transferedData.setMedicine("Dolo");
+                // transferedData.setMedicine(curbundle.getEntry().get(4).getResource().getMedicationCodeableConcept().getText());
 
+    
                 //Add remaining
                 
-                String expDate = consentRepository.findExpirayDateByConsentId(curConsent.get(0));
-                transferedData.setExpirayDate(expDate);
+                List<String> expDate = consentRepository.getExpirayDateFromconsentId(curConsent.get(0));
+                transferedData.setExpirayDate(expDate.get(0));
 
                 transferedDataRepository.save(transferedData);
                 

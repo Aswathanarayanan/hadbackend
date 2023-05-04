@@ -39,9 +39,11 @@ public interface ConsentRepository extends JpaRepository<HIUConsentTable,Integer
 
     List<HIUConsentTable> findAll();
 
-    String findExpirayDateByConsentId(String consentId);
+    @Query(value = "SELECT expiry_date FROM hiuconsent_table u WHERE u.consent_id  = :consent_id", nativeQuery = true)
+    List<String> getExpirayDateFromconsentId(@Param(value = "consent_id") String consent_id);
 
-    
+
+
 
     // @Transactional
     // @Modifying
