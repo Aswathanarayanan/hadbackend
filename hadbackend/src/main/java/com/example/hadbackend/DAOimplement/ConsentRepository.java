@@ -39,6 +39,10 @@ public interface ConsentRepository extends JpaRepository<HIUConsentTable,Integer
 
     List<HIUConsentTable> findAll();
 
+    String findExpirayDateByConsentId(String consentId);
+
+    
+
     // @Transactional
     // @Modifying
     // @Query("update HIUConsentTable u set u.bundleData = :bundleData where u.consentId = :consentId")

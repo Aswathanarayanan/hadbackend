@@ -539,8 +539,8 @@ public class RequestController {
                 DecryptionResponse decryptionResponse= decryptionController.decrypt(decryptionRequest);
                 medicalrecords.add(decryptionResponse.getDecryptedData());
                
-                // Gson gson = new Gson();
-                // Bundle curbundle = gson.fromJson(decryptionResponse.getDecryptedData(), Bundle.class);
+                Gson gson = new Gson();
+                Bundle curbundle = gson.fromJson(decryptionResponse.getDecryptedData(), Bundle.class);
 
                 // System.out.println(curbundle.getResourceType());
 
@@ -556,10 +556,13 @@ public class RequestController {
                 List<String> abha = consentRepository.getAbhaID(data.getTransactionId());
                 transferedData.setAbhaid(abha.get(0));
 
-                transferedData.setMedicine("DOLO");
+                transferedData.setMedicine("Dolo");
 
                 //Add remaining
                 
+                String expDate = consentRepository.findExpirayDateByConsentId(curConsent.get(0));
+                transferedData.setExpirayDate(expDate);
+
                 transferedDataRepository.save(transferedData);
                 
                 String careContext=rec.getCareContextReference();

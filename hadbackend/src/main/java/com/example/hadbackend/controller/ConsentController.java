@@ -21,6 +21,7 @@ import com.example.hadbackend.DAOimplement.ConsentRepository;
 import com.example.hadbackend.DAOimplement.HIPConsentRepository;
 import com.example.hadbackend.DAOimplement.MedicalData;
 import com.example.hadbackend.DAOimplement.PatientRepository;
+import com.example.hadbackend.DAOimplement.TransferedDataRepository;
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
 import com.example.hadbackend.bean.consent.Consent;
 import com.example.hadbackend.bean.consent.ConsentDateRange;
@@ -67,6 +68,9 @@ public class ConsentController {
 
     @Autowired 
     HIPConsentRepository hipConsentRepository;
+
+    @Autowired
+    TransferedDataRepository transferedDataRepository;
 
 
     @PostMapping("/generateconsent")
@@ -180,6 +184,8 @@ public class ConsentController {
 
         consentRepository.deleteoldconsents(asISO);
         hipConsentRepository.deleteoldconsents(asISO); 
+        transferedDataRepository.deleteExpiredData(asISO);
+
     }
 
 }

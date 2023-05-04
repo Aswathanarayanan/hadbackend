@@ -1,7 +1,5 @@
 package com.example.hadbackend.bean.dataTransfer;
 
-import java.util.Date;
-
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -46,5 +44,8 @@ public class TransferedData {
 
     @Column
     private String instruction;
+
+    @Column
+    private String expirayDate;
     
 }
