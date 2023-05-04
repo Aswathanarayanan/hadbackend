@@ -4,11 +4,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import com.example.hadbackend.bean.carecontext.Patient;
 import com.example.hadbackend.bean.dataTransfer.DataEntries;
 import com.example.hadbackend.bean.dataTransfer.DataPush;
 import com.example.hadbackend.bean.dataTransfer.HealthInfoNotify;
@@ -24,11 +23,11 @@ import com.example.hadbackend.security.keys.*;
 import com.example.hadbackend.security.keys.KeyMaterial;
 import com.example.hadbackend.service.fhir.OPconsultation;
 
+import org.hl7.fhir.r4.model.Bundle;
+
 import lombok.SneakyThrows;
 
-import org.apache.tomcat.util.json.JSONParser;
-import org.hl7.fhir.r4.model.Bundle;
-import org.json.JSONObject;
+//import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -61,10 +60,7 @@ import com.example.hadbackend.bean.request.OnRequesthiRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
-import com.example.hadbackend.bean.carecontext.Patient;
 import com.example.hadbackend.security.encryotion.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -541,8 +537,10 @@ public class RequestController {
                
                 Gson gson = new Gson();
                 Bundle curbundle = gson.fromJson(decryptionResponse.getDecryptedData(), Bundle.class);
-
                 // System.out.println(curbundle.getResourceType());
+//                curbundle.getEntry().get(5).getResource().getMeta().
+
+
 
                 // Medicalrecords curRow = new Medicalrecords();
                 // curRow.setDosage(curbundle.getEntry().get(6).getResource().getMedicationCodeableConcept());
@@ -555,8 +553,14 @@ public class RequestController {
 
                 List<String> abha = consentRepository.getAbhaID(data.getTransactionId());
                 transferedData.setAbhaid(abha.get(0));
+                transferedData.setInstruction(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(1).toString());
+                transferedData.setDosage(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(2).toString());
+                transferedData.setSymptoms(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(3).toString());
+                transferedData.setMedicine(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(4).toString());
+                transferedData.setPattern(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(5).toString());
+                transferedData.setTimings(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(6).toString());
 
-                transferedData.setMedicine("Dolo");
+//                transferedData.setMedicine("Dolo");
 
                 //Add remaining
                 

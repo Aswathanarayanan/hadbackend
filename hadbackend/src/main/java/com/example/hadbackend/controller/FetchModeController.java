@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -330,6 +331,8 @@ public class FetchModeController {
     LoginRepository loginRepository;
     @PostMapping("/adduser")
     public void addUser(@RequestBody Login login){
+
+        login.setPassword(new BCryptPasswordEncoder().encode(login.getPassword()));
         loginRepository.save(login);
     }
 
