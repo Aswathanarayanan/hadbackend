@@ -53,7 +53,7 @@ public class NotifyController {
     @PostMapping("/v0.5/consents/hip/notify")
     public void Notify(@RequestBody NotifyResponse root) throws JsonProcessingException, ParseException{
 
-        System.out.println("Received HIP Notify");
+        System.out.println("Received HIP Notify with status - " + root.getNotification().getStatus());
         
         consentID = root.getNotification().getConsentId();
         requestID = root.getRequestId();
@@ -73,41 +73,40 @@ public class NotifyController {
         
             HIPConsentTable consentTable = new HIPConsentTable();
             
-            String strPattern = "\\d{4}-\\d{2}-\\d{2}";
+            // String strPattern = "\\d{4}-\\d{2}-\\d{2}";
             
-            Pattern pattern = Pattern.compile(strPattern);
-            Matcher matcher = pattern.matcher(expDate);
+            // Pattern pattern = Pattern.compile(strPattern);
+            // Matcher matcher = pattern.matcher(expDate);
             
-            Date date = new Date();
+            // Date date = new Date();
     
-            while( matcher.find()){
-                System.out.println( matcher.group());
-                date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
-            }
+            // while( matcher.find()){
+            //     System.out.println( matcher.group());
+            //     date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+            // }
 
-            consentTable.setExpiryDate(date);
+            consentTable.setExpiryDate(expDate);
 
-            matcher = pattern.matcher(fromDate);
+            // matcher = pattern.matcher(fromDate);
             
-            while( matcher.find()){
-                System.out.println( matcher.group());
-                date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
-            }
+            // while( matcher.find()){
+            //     System.out.println( matcher.group());
+            //     date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+            // }
             
-            consentTable.setDateFrom(date);
+            consentTable.setDateFrom(fromDate);
 
-            matcher = pattern.matcher(toDate);
+            // matcher = pattern.matcher(toDate);
             
-            while( matcher.find()){
-                System.out.println( matcher.group());
-                date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
-            }
+            // while( matcher.find()){
+            //     System.out.println( matcher.group());
+            //     date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+            // }
         
-            consentTable.setDateTo(date);
+            consentTable.setDateTo(toDate);
             
             consentTable.setAbhaid(root.getNotification().getConsentDetail().getPatient().getId());
             consentTable.setConsentId(consentID);
-            
             hipConsentRepository.save(consentTable);
     
             System.out.println("Consent Artifact saved in HIP DB");
@@ -162,7 +161,7 @@ public class NotifyController {
     @PostMapping("/v0.5/consents/hiu/notify")
     public void consentHIUNotify(@RequestBody HIUNotify root) throws JsonProcessingException{
         
-        System.out.println("Received HIP Notify with status - "+root.getNotification().getStatus());
+        System.out.println("Received HIU Notify with status - "+root.getNotification().getStatus());
 
         String stat = root.getNotification().getStatus();
         if(stat.equals("GRANTED")){

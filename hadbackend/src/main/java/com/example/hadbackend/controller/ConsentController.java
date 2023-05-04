@@ -21,6 +21,7 @@ import com.example.hadbackend.DAOimplement.ConsentRepository;
 import com.example.hadbackend.DAOimplement.HIPConsentRepository;
 import com.example.hadbackend.DAOimplement.MedicalData;
 import com.example.hadbackend.DAOimplement.PatientRepository;
+import com.example.hadbackend.DAOimplement.TransferedDataRepository;
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
 import com.example.hadbackend.bean.consent.Consent;
 import com.example.hadbackend.bean.consent.ConsentDateRange;
@@ -67,6 +68,10 @@ public class ConsentController {
 
     @Autowired 
     HIPConsentRepository hipConsentRepository;
+
+    @Autowired
+    TransferedDataRepository transferedDataRepository;
+
 
     @PostMapping("/generateconsent")
     public void generateConsent(@RequestBody ConsentRequestFromFrontend consentRequestFromFrontend) throws JsonProcessingException{
@@ -133,12 +138,12 @@ public class ConsentController {
             
             ConsentDateRange consentDateRange=new ConsentDateRange();
             
-            consentDateRange.setFrom(consentRequestFromFrontend.getDateFrom()+"T12:52:34.925Z");
-            consentDateRange.setTo(consentRequestFromFrontend.getDateTo()+"T12:52:34.925Z");
+            consentDateRange.setFrom(consentRequestFromFrontend.getDateFrom());
+            consentDateRange.setTo(consentRequestFromFrontend.getDateTo());
             
             consentPermission.setDateRange(consentDateRange);
 
-            consentPermission.setDataEraseAt(consentRequestFromFrontend.getExpirayDate()+"T12:52:34.925Z");
+            consentPermission.setDataEraseAt(consentRequestFromFrontend.getExpiryDate());
             
             ConsentFrequency consentFrequency=new ConsentFrequency();
             consentFrequency.setUnit("HOUR");
@@ -170,16 +175,17 @@ public class ConsentController {
         return medicalData.findByPatient(patientRepository.findPatientsById(abhaid));
     }
 
-
-    @PostMapping("/deleteexpiredconsent")
-    public void removeoldconsents() throws ParseException{
+    @PostMapping("/deleteConsents")
+    public void deleteConsents() throws ParseException{
         Date date = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd");
+        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd 00:00:00.000000");
         String asISO= dateFormat.format(date);
         System.out.println(asISO);
-        Date curdate = dateFormat.parse(asISO);
-        System.out.println(curdate);
-        consentRepository.deleteAllByExpiryDateBefore(curdate);
-        hipConsentRepository.deleteAllByExpiryDateBefore(curdate);
+
+        consentRepository.deleteoldconsents(asISO);
+        hipConsentRepository.deleteoldconsents(asISO); 
+        transferedDataRepository.deleteExpiredData(asISO);
+
     }
+
 }

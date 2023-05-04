@@ -95,8 +95,8 @@ public class FetchModeController {
     @PostMapping("/session")
     public String getsession(){
         SessionRequest sessiontoken=new SessionRequest();
-        sessiontoken.setClientId("SBX_002859");
-        sessiontoken.setClientsecret("7fd0134e-9311-41b5-a378-02d743f9f3b0");
+        sessiontoken.setClientId("SBX_002857");
+        sessiontoken.setClientsecret("fbc31adb-1c39-4cec-843d-ac62e3c82dfa");
 
         SessionResponse token_res = webClient.post()
                 .uri("https://dev.abdm.gov.in/gateway/v0.5/sessions")
@@ -131,7 +131,7 @@ public class FetchModeController {
         newQuery.setPurpose("KYC_AND_LINK");
 
         Requester requester=new Requester();
-        requester.setId("iiitbteam18");
+        requester.setId("ashish-hip-1");
         requester.setType("HIP");
 
         newQuery.setRequester(requester);
@@ -190,7 +190,7 @@ public class FetchModeController {
 
         Requester requester=new Requester();
         requester.setType("HIP");
-        requester.setId("iiitbteam18");
+        requester.setId("ashish-hip-1");
 
         initRequestQuery.setRequester(requester);
 
@@ -377,7 +377,7 @@ public class FetchModeController {
         medicalrecords.setDoctor(doctor);
         medicalrecords.setPatient(patient);
         medicalrecords.setVistid(patient.getVisitid());
-        medicalrecords.setDate(date);
+        medicalrecords.setDate(patient.getVisitid());
         medicalData.save(medicalrecords);
 
         // medicalrecords=

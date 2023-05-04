@@ -9,21 +9,26 @@ import java.util.regex.Pattern;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import com.amazonaws.services.dynamodbv2.xspec.S;
-import com.example.hadbackend.bean.auth.FetchModeRequest;
 import com.example.hadbackend.bean.dataTransfer.DataEntries;
 import com.example.hadbackend.bean.dataTransfer.DataPush;
+import com.example.hadbackend.bean.dataTransfer.HealthInfoNotify;
+import com.example.hadbackend.bean.dataTransfer.HealthInfoNotifyNotification;
+import com.example.hadbackend.bean.dataTransfer.HealthInfoNotifyNotifier;
+import com.example.hadbackend.bean.dataTransfer.HealthInfoNotifyStatus;
+import com.example.hadbackend.bean.dataTransfer.HealthInfoNotifyStatusResponses;
+import com.example.hadbackend.bean.dataTransfer.TransferedData;
 import com.example.hadbackend.security.dercyprion.DecryptionController;
 import com.example.hadbackend.security.dercyprion.DecryptionRequest;
 import com.example.hadbackend.security.dercyprion.DecryptionResponse;
 import com.example.hadbackend.security.keys.*;
 import com.example.hadbackend.security.keys.KeyMaterial;
-import com.example.hadbackend.service.fhir.OPConsult;
 import com.example.hadbackend.service.fhir.OPconsultation;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+
 import lombok.SneakyThrows;
+
+import org.apache.tomcat.util.json.JSONParser;
 import org.hl7.fhir.r4.model.Bundle;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +44,7 @@ import com.example.hadbackend.DAOimplement.ConsentRepository;
 import com.example.hadbackend.DAOimplement.HIPConsentRepository;
 import com.example.hadbackend.DAOimplement.MedicalData;
 import com.example.hadbackend.DAOimplement.PatientRepository;
+import com.example.hadbackend.DAOimplement.TransferedDataRepository;
 import com.example.hadbackend.bean.auth.Resp;
 import com.example.hadbackend.bean.consent.HIPConsentTable;
 import com.example.hadbackend.bean.consent.HIUConsentTable;
@@ -54,15 +60,16 @@ import com.example.hadbackend.bean.request.OnRequest;
 import com.example.hadbackend.bean.request.OnRequesthiRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
 import com.example.hadbackend.bean.carecontext.Patient;
 import com.example.hadbackend.security.encryotion.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Getter
 @Setter
@@ -92,11 +99,21 @@ public class RequestController {
 
     @Autowired
     DecryptionController decryptionController;
+
+    @Autowired
+    TransferedData transferedData;
+
+    @Autowired
+    TransferedDataRepository transferedDataRepository;
+
     FetchModeController fetchModeController=new FetchModeController();
 
     String token;
 
     String hiupublicKey,hiuprivateKey,hiunonce;
+
+    String hiuConsentID;
+
     int flag=0;
     
     @PostMapping("/v0.5/consents/on-fetch")
@@ -112,6 +129,8 @@ public class RequestController {
         String consentID = onFetchConsent.getConsent().getConsentDetail().getConsentId();
         String dateFrom = onFetchConsent.getConsent().getConsentDetail().getPermission().getDateRange().getFrom();
         String dateTo = onFetchConsent.getConsent().getConsentDetail().getPermission().getDateRange().getTo();
+
+        hiuConsentID = consentID;//For storing txnID in HIU table;
         
         //Store this data in DB
 
@@ -121,37 +140,37 @@ public class RequestController {
 
         HIUConsentTable consentTable = new HIUConsentTable();
 
-        String strPattern = "\\d{4}-\\d{2}-\\d{2}";
+        // String strPattern = "\\d{4}-\\d{2}-\\d{2}";
 
-        Pattern pattern = Pattern.compile(strPattern);
-        Matcher matcher = pattern.matcher(expDate);
+        // Pattern pattern = Pattern.compile(strPattern);
+        // Matcher matcher = pattern.matcher(expDate);
 
-        Date date = new Date();
+        // Date date = new Date();
 
-        while(matcher.find()){
-            System.out.println(matcher.group());
-            date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
-        }
+        // while(matcher.find()){
+        //     System.out.println(matcher.group());
+        //     date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+        // }
 
-        consentTable.setExpiryDate(date);
+        consentTable.setExpiryDate(expDate);
 
-        matcher = pattern.matcher(fromDate);
+        // matcher = pattern.matcher(fromDate);
 
-        while(matcher.find()) {
-            System.out.println(matcher.group());
-            date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
-        }
+        // while(matcher.find()) {
+        //     System.out.println(matcher.group());
+        //     date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+        // }
         
-        consentTable.setDateFrom(date);
+        consentTable.setDateFrom(fromDate);
 
-        matcher = pattern.matcher(toDate);
+        // matcher = pattern.matcher(toDate);
 
-        while(matcher.find()) {
-            System.out.println(matcher.group());
-            date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
-        }
+        // while(matcher.find()) {
+        //     System.out.println(matcher.group());
+        //     date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+        // }
 
-        consentTable.setDateTo(date);
+        consentTable.setDateTo(toDate);
 
         consentTable.setAbhaid(onFetchConsent.getConsent().getConsentDetail().getPatient().getId());
         consentTable.setConsentId(consentID);
@@ -186,7 +205,7 @@ public class RequestController {
         hiRequest.setDateRange(cmRequestDateRange);
 
         //Change URL (NGROK)
-        hiRequest.setDataPushUrl("https://c90c-103-156-19-229.ngrok-free.app/gethipdata");
+        hiRequest.setDataPushUrl("https://9109-103-156-19-229.ngrok-free.app/gethipdata");
 
         CmRequestKeyMaterial cmRequestKeyMaterial = new CmRequestKeyMaterial();
         cmRequestKeyMaterial.setCryptoAlg("ECDH");
@@ -241,6 +260,8 @@ public class RequestController {
     public void onRequestHIU(@RequestBody OnRequest onRequest){
 
         System.out.println("Received HIU On Request");
+
+        consentRepository.updateTransactionId(onRequest.getHiRequest().getTransactionId(),hiuConsentID);
 
     }
 
@@ -308,15 +329,19 @@ public class RequestController {
             
             List<HIPConsentTable> consentTable = hipconsentRepository.findAllByConsentId(consent);
 
-            for(int i=0;i<consentTable.size();i++)
-            {
+            hipconsentRepository.updateTransactionId(hipRequest.getTransactionId(), consent);
+
+            for(int i=0;i<consentTable.size();i++){
+
                 HIPConsentTable row = consentTable.get(i);
 
                 String abhaid = row.getAbhaid();
 
                 Patient patient = patientRepository.findPatientsById(abhaid);
 
-                List<Medicalrecords> listData = medicalData.findAllByPatientAndDateBetween(patient, row.getDateFrom(), row.getDateTo());
+                List<Medicalrecords> listData = medicalData.getCareContexts(patient.getPatientid(), row.getDateFrom(), row.getDateTo());
+
+                List<HealthInfoNotifyStatusResponses> respList =new ArrayList<>();
 
                 //hip keygen
                 String hiupublicK = hipRequest.getHiRequest().getKeyMaterial().getDhPublicKey().getKeyValue();
@@ -337,9 +362,8 @@ public class RequestController {
                 EncryptionResponse encryptionResponse=new EncryptionResponse();
                 ArrayList<DataEntries>dataEntries = new ArrayList<>();
                 //encrypt every records
-                for(int j=0;j<listData.size();j++)
-                {
-                    Medicalrecords cur = listData.get(i);
+                for(int j=0;j<listData.size();j++){
+                    Medicalrecords cur = listData.get(j);//changed to j
                     //bundle creation
                     Bundle records= opConsultion.bundleoutput(cur);
 
@@ -372,6 +396,14 @@ public class RequestController {
                     dataEntries.add(dataEntries1);
 
                     System.out.println(cur.getMedicine());
+
+                    String careContext=cur.getVistid();
+                    HealthInfoNotifyStatusResponses healthInfoNotifyStatusResponses = new HealthInfoNotifyStatusResponses();
+                    healthInfoNotifyStatusResponses.setCareContextReference(careContext);
+                    healthInfoNotifyStatusResponses.setDescription("Done"); //check
+                    healthInfoNotifyStatusResponses.setHiStatus("DELIVERED");
+                    respList.add(healthInfoNotifyStatusResponses);
+
                 }
 
                 DataPush dataPush=new DataPush();
@@ -401,8 +433,58 @@ public class RequestController {
 //                        .body(Mono.just(dataPush), DataPush.class)
 //                        .retrieve().bodyToMono(Object.class);
                 System.out.println("Data transfer");
+
+                //Calling Health Data notify by HIP - DATA TRANSFERRED
+
+                System.out.println("HIP Sending Data Transfer Status - "+hipRequest.getTransactionId());
+
+                HealthInfoNotify healthInfoNotify = new HealthInfoNotify();
+                
+                token =fetchModeController.getsession();
+                
+                uuid = UUID.randomUUID();
+                randomUUIDString = uuid.toString();
+                healthInfoNotify.setRequestId(randomUUIDString);
+
+                timeZone=TimeZone.getTimeZone("UTC");
+                dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.SSSSSS");
+                dateFormat.setTimeZone(timeZone);
+                asISO= dateFormat.format(new Date());
+                healthInfoNotify.setTimestamp(asISO);
+
+                HealthInfoNotifyNotification healthInfoNotifyNotification = new HealthInfoNotifyNotification();
+                
+                healthInfoNotifyNotification.setConsentId(consentTable.get(i).getConsentId());
+                healthInfoNotifyNotification.setTransactionId(consentTable.get(i).getTransactionId());
+                healthInfoNotifyNotification.setDoneAt(asISO);
+
+                HealthInfoNotifyNotifier healthInfoNotifyNotifier = new HealthInfoNotifyNotifier();
+
+                healthInfoNotifyNotifier.setId("ashish-hiu-1"); //hardcoded 
+                healthInfoNotifyNotifier.setType("HIU");
+
+                healthInfoNotifyNotification.setNotifier(healthInfoNotifyNotifier);
+
+                HealthInfoNotifyStatus healthInfoNotifyStatus = new HealthInfoNotifyStatus();
+                healthInfoNotifyStatus.setHipId("ashish-hip-1"); //Check correct or Not
+                healthInfoNotifyStatus.setSessionStatus("TRANSFERRED");
+                healthInfoNotifyStatus.setStatusResponses(respList);
+
+                healthInfoNotifyNotification.setStatusNotification(healthInfoNotifyStatus);
+
+                
+                healthInfoNotify.setNotification(healthInfoNotifyNotification);
+
+                String curr_body2=new ObjectMapper().writeValueAsString(healthInfoNotify);
+                HttpEntity<String> httpEntity2 = new HttpEntity<>(curr_body2, headers);
+            
+                ResponseEntity<Object> objectResponseEntity2=restTemplate.exchange("https://dev.abdm.gov.in/gateway/v0.5/health-information/notify", HttpMethod.POST, httpEntity2, Object.class);
+                    
+                System.out.println("HIP DATA NOTIFY TO ABDM - " + objectResponseEntity2.getStatusCode());
+
             }
         }
+        
 
         flag=0;
 
@@ -411,36 +493,32 @@ public class RequestController {
     //Test
     @PostMapping("/saveConsent")
     public void saveConsent() throws ParseException{
-        String str = "2020-10-06T10:50:37.764Z";
-        
-        String strPattern = "\\d{4}-\\d{2}-\\d{2}";
-        
-        Pattern pattern = Pattern.compile(strPattern);
-        Matcher matcher = pattern.matcher(str);
-        
-        Date date = new Date();
+        TimeZone timeZone=TimeZone.getTimeZone("UTC");
+        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.SSSSSS");
+        dateFormat.setTimeZone(timeZone);
+        String asISO= dateFormat.format(new Date());
 
-        while( matcher.find() ) {
-            System.out.println( matcher.group());
-            date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
-        }
+        // String strPattern = "\\d{4}-\\d{2}-\\d{2}";
+        
+        // Pattern pattern = Pattern.compile(strPattern);
+        // Matcher matcher = pattern.matcher(asISO);
+        
+        // Date date = new Date();
+
+        // while( matcher.find() ) {
+        //     System.out.println( matcher.group());
+        //     date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group());
+        // }
         // Date date = new SimpleDateFormat("yyyy-MM-dd").parse(matcher.group(1));
 
         HIUConsentTable consentTable = new HIUConsentTable();
         consentTable.setAbhaid("ashish");
         consentTable.setConsentId("1234");
-        consentTable.setExpiryDate(date);
+        consentTable.setExpiryDate(asISO);
 
         consentRepository.save(consentTable);
 
     }   
-
-    @PostMapping("/deleteConsents")
-    public void deleteConsents() throws ParseException{
-        
-         //consentRepository.deleteByID(consentRepository.);
-        
-    }
 
     @SneakyThrows
     @PostMapping(value = "/gethipdata")
@@ -453,15 +531,107 @@ public class RequestController {
         String hippublickey=data.getKeyMaterial().getDhPublicKey().getKeyValue();
         String hipnonce=data.getKeyMaterial().getNonce();
         List<String> medicalrecords=new ArrayList<>();
+        List<HealthInfoNotifyStatusResponses> respList =new ArrayList<>();
+
         for (DataEntries rec: data.getEntries()) {
                 String cur=rec.getContent();
-            DecryptionRequest decryptionRequest=new DecryptionRequest(hiuprivateKey,hiunonce,hippublickey,hipnonce,cur);
-            DecryptionResponse decryptionResponse= decryptionController.decrypt(decryptionRequest);
+                DecryptionRequest decryptionRequest=new DecryptionRequest(hiuprivateKey,hiunonce,hippublickey,hipnonce,cur);
+                DecryptionResponse decryptionResponse= decryptionController.decrypt(decryptionRequest);
                 medicalrecords.add(decryptionResponse.getDecryptedData());
+               
+                Gson gson = new Gson();
+                Bundle curbundle = gson.fromJson(decryptionResponse.getDecryptedData(), Bundle.class);
+
+                // System.out.println(curbundle.getResourceType());
+
+                // Medicalrecords curRow = new Medicalrecords();
+                // curRow.setDosage(curbundle.getEntry().get(6).getResource().getMedicationCodeableConcept());
+
+                //Save Transferred Data in DB
+
+                TransferedData transferedData = new TransferedData();
+                List<String> curConsent = consentRepository.getConsentID(data.getTransactionId());
+                transferedData.setConsentID(curConsent.get(0));
+
+                List<String> abha = consentRepository.getAbhaID(data.getTransactionId());
+                transferedData.setAbhaid(abha.get(0));
+
+                transferedData.setMedicine("Dolo");
+
+                //Add remaining
+                
+                String expDate = consentRepository.findExpirayDateByConsentId(curConsent.get(0));
+                transferedData.setExpirayDate(expDate);
+
+                transferedDataRepository.save(transferedData);
+                
+                String careContext=rec.getCareContextReference();
+                HealthInfoNotifyStatusResponses healthInfoNotifyStatusResponses = new HealthInfoNotifyStatusResponses();
+                healthInfoNotifyStatusResponses.setCareContextReference(careContext);
+                healthInfoNotifyStatusResponses.setDescription("Done"); //check
+                healthInfoNotifyStatusResponses.setHiStatus("OK");
+                respList.add(healthInfoNotifyStatusResponses);
+
         }
         System.out.println(medicalrecords.get(0));
 
-        return "Success-datatransfer";
+        //Calling Health Data notify by HIU - DATA TRANSFERRED
+
+        System.out.println("HIU Sending Data Transfer Status - "+data.getTransactionId());
+
+        HealthInfoNotify healthInfoNotify = new HealthInfoNotify();
+        
+        token =fetchModeController.getsession();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.ALL));
+        headers.add("X-CM-ID","sbx");
+        headers.add("Authorization",token);
+
+        UUID uuid = UUID.randomUUID();
+        String randomUUIDString = uuid.toString();
+        healthInfoNotify.setRequestId(randomUUIDString);
+
+        TimeZone timeZone=TimeZone.getTimeZone("UTC");
+        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss.SSSSSS");
+        dateFormat.setTimeZone(timeZone);
+        String asISO= dateFormat.format(new Date());
+        healthInfoNotify.setTimestamp(asISO);
+
+        HealthInfoNotifyNotification healthInfoNotifyNotification = new HealthInfoNotifyNotification();
+        
+        List<String> curConsentID = consentRepository.getConsentID(data.getTransactionId());
+        
+        healthInfoNotifyNotification.setConsentId(curConsentID.get(0));
+        healthInfoNotifyNotification.setTransactionId(data.getTransactionId());
+        healthInfoNotifyNotification.setDoneAt(asISO);
+
+        HealthInfoNotifyNotifier healthInfoNotifyNotifier = new HealthInfoNotifyNotifier();
+
+        healthInfoNotifyNotifier.setId("ashish-hiu-1"); //hardcoded 
+        healthInfoNotifyNotifier.setType("HIU");
+
+        healthInfoNotifyNotification.setNotifier(healthInfoNotifyNotifier);
+
+        HealthInfoNotifyStatus healthInfoNotifyStatus = new HealthInfoNotifyStatus();
+        healthInfoNotifyStatus.setHipId("ashish-hip-1"); //Check correct or Not
+        healthInfoNotifyStatus.setSessionStatus("TRANSFERRED");
+        healthInfoNotifyStatus.setStatusResponses(respList);
+
+        healthInfoNotifyNotification.setStatusNotification(healthInfoNotifyStatus);
+
+        
+        healthInfoNotify.setNotification(healthInfoNotifyNotification);
+
+        String curr_body=new ObjectMapper().writeValueAsString(healthInfoNotify);
+        HttpEntity<String> httpEntity = new HttpEntity<>(curr_body, headers);
+    
+        ResponseEntity<Object> objectResponseEntity=restTemplate.exchange("https://dev.abdm.gov.in/gateway/v0.5/health-information/notify", HttpMethod.POST, httpEntity,Object.class);
+            
+        System.out.println("HIU DATA NOTIFY TO ABDM - " + objectResponseEntity.getStatusCode());
+
+        return "Success-datatransfer and NOTIFY BY HIU";
     }
 
 }
