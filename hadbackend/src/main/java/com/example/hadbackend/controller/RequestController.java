@@ -4,11 +4,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import com.example.hadbackend.bean.carecontext.Patient;
 import com.example.hadbackend.bean.dataTransfer.DataEntries;
 import com.example.hadbackend.bean.dataTransfer.DataPush;
 import com.example.hadbackend.bean.dataTransfer.HealthInfoNotify;
@@ -24,12 +23,11 @@ import com.example.hadbackend.security.keys.*;
 import com.example.hadbackend.security.keys.KeyMaterial;
 import com.example.hadbackend.service.fhir.OPconsultation;
 
+import org.hl7.fhir.r4.model.Bundle;
+
 import lombok.SneakyThrows;
 
-import org.apache.tomcat.util.json.JSONParser;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.json.JSONObject;
+//import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -60,12 +58,10 @@ import com.example.hadbackend.bean.request.HIPRequest;
 import com.example.hadbackend.bean.request.OnRequest;
 import com.example.hadbackend.bean.request.OnRequesthiRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
-import com.example.hadbackend.bean.carecontext.Patient;
 import com.example.hadbackend.security.encryotion.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -539,11 +535,15 @@ public class RequestController {
                 DecryptionRequest decryptionRequest=new DecryptionRequest(hiuprivateKey,hiunonce,hippublickey,hipnonce,cur);
                 DecryptionResponse decryptionResponse= decryptionController.decrypt(decryptionRequest);
                 medicalrecords.add(decryptionResponse.getDecryptedData());
+                System.out.println("278273827  "+medicalrecords.get(0));
                
-                Gson gson = new Gson();
-                Bundle curbundle = gson.fromJson(decryptionResponse.getDecryptedData(), Bundle.class);
-
+                System.out.println(decryptionResponse.getDecryptedData());
+                // Gson gson = new Gson();
+                // Bundle curbundle = gson.fromJson(decryptionResponse.getDecryptedData(), Bundle.class);
                 // System.out.println(curbundle.getResourceType());
+//                curbundle.getEntry().get(5).getResource().getMeta().
+
+
 
                 // Medicalrecords curRow = new Medicalrecords();
                 // curRow.setDosage(curbundle.getEntry().get(6).getResource().getMedicationCodeableConcept());
@@ -551,7 +551,21 @@ public class RequestController {
                 //Save Transferred Data in DB
 
                 ObjectMapper objectMapper = new ObjectMapper();
-                Bundle myObject = objectMapper.readValue(decryptionResponse.getDecryptedData(), Bundle.class);
+                // Bundle curbundle = objectMapper.readValue(decryptionResponse.getDecryptedData(), Bundle.class);
+
+                JsonNode curbundle = objectMapper.readTree(decryptionResponse.getDecryptedData());
+
+                JsonNode profileNode=curbundle.path("entry");
+                List<JsonNode> entrylist=new ArrayList<>();
+                for(JsonNode abc : profileNode){
+                    entrylist.add(abc);
+                }
+                JsonNode dataentry = entrylist.get(5).path("resource").path("meta").path("profile");
+                for (JsonNode node : dataentry){
+                    System.out.println(node.asText());
+                }
+
+                //System.out.println(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(1).toString());
 
                 TransferedData transferedData = new TransferedData();
                 List<String> curConsent = consentRepository.getConsentID(data.getTransactionId());
@@ -559,10 +573,15 @@ public class RequestController {
 
                 List<String> abha = consentRepository.getAbhaID(data.getTransactionId());
                 transferedData.setAbhaid(abha.get(0));
+                transferedData.setInstruction(dataentry.get(1).asText());
+                transferedData.setDosage(dataentry.get(2).asText());
+                transferedData.setSymptoms(dataentry.get(3).asText());
+                transferedData.setMedicine(dataentry.get(4).asText());
+                transferedData.setPattern(dataentry.get(5).asText());
+                transferedData.setTimings(dataentry.get(6).asText());
 
-                // transferedData.setMedicine(curbundle.getEntry().get(4).getResource().getMedicationCodeableConcept().getText());
+//                transferedData.setMedicine("Dolo");
 
-    
                 //Add remaining
                 
                 List<String> expDate = consentRepository.getExpirayDateFromconsentId(curConsent.get(0));
@@ -578,7 +597,7 @@ public class RequestController {
                 respList.add(healthInfoNotifyStatusResponses);
 
         }
-        System.out.println(medicalrecords.get(0));
+        //System.out.println(medicalrecords.get(0));
 
         //Calling Health Data notify by HIU - DATA TRANSFERRED
 

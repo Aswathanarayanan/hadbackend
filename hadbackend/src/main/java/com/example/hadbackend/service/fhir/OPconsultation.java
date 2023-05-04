@@ -481,6 +481,12 @@ public class OPconsultation {
             MedicationRequest medicationRequest = new MedicationRequest();
             medicationRequest.setId("MedicationRequest-"+new Random().nextInt(900));
             medicationRequest.getMeta().addProfile("https://nrces.in/ndhm/fhir/r4/StructureDefinition/MedicationRequest");
+            medicationRequest.getMeta().addProfile(medicalrecords.getInstruction());
+            medicationRequest.getMeta().addProfile(medicalrecords.getDosage());
+            medicationRequest.getMeta().addProfile(medicalrecords.getSymptoms());
+            medicationRequest.getMeta().addProfile(medicalrecords.getMedicine());
+            medicationRequest.getMeta().addProfile(medicalrecords.getPattern());
+            medicationRequest.getMeta().addProfile(medicalrecords.getTimings());
             medicationRequest.setStatus(MedicationRequestStatus.ACTIVE);
             medicationRequest.setIntent(MedicationRequestIntent.ORDER);
             medicationRequest.setMedication(new CodeableConcept().setText(medicalrecords.getMedicine()));
