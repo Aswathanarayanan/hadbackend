@@ -1,0 +1,46 @@
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.Date;
+
+public class JWTController {
+    private final String secretKey;
+    private final SignatureAlgorithm algorithm;
+
+    public JWTController(String secretKey, SignatureAlgorithm algorithm) {
+        this.secretKey = secretKey;
+        this.algorithm = algorithm;
+    }
+
+    public String generateToken(Object payload, long expireTime) {
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+
+        JwtBuilder builder = Jwts.builder()
+                .setSubject(payload.toString())
+                .setIssuedAt(now)
+                .signWith(algorithm, secretKey.getBytes());
+
+        if (expireTime > 0) {
+            long expMillis = nowMillis + expireTime;
+            Date exp = new Date(expMillis);
+            builder.setExpiration(exp);
+        }
+
+        return builder.compact();
+    }
+
+    public Claims decodeToken(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secretKey.getBytes())
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            return null;
+        }
+    }
+}
+
