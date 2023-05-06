@@ -330,6 +330,8 @@ public class FetchModeController {
     LoginRepository loginRepository;
     @PostMapping("/adduser")
     public void addUser(@RequestBody Login login){
+
+        login.setPassword(new BCryptPasswordEncoder().encode(login.getPassword()));
         loginRepository.save(login);
     }
 
