@@ -1,0 +1,19 @@
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.SignatureAlgorithm;
+
+public class JWTService {
+    private final JWTController jwtController;
+
+    public JWTService(String secretKey, SignatureAlgorithm algorithm, long expireTime) {
+        jwtController = new JWTController(secretKey, algorithm);
+    }
+
+    public String generateToken(int userId) {
+        return jwtController.generateToken(userId, 0);
+    }
+
+    public Claims decodeToken(String token) {
+        return jwtController.decodeToken(token);
+    }
+}

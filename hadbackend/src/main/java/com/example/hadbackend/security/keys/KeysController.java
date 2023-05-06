@@ -23,7 +23,7 @@ public class KeysController {
         String receiverNonce = generateRandomKey();
         return new KeyMaterial(receiverPrivateKey, receiverPublicKey, receiverNonce);
     }
-
+    // generating key pair
     private KeyPair generateKeyPair() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         Security.addProvider(new BouncyCastleProvider());
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(Constants.ALGORITHM, Constants.PROVIDER);
@@ -48,7 +48,7 @@ public class KeysController {
         ECPublicKey ecKey = (ECPublicKey) key;
         return ecKey.getQ().getEncoded(false);
     }
-
+    // get random keys
     private String generateRandomKey() {
         byte[] salt = new byte[32];
         SecureRandom random = new SecureRandom();
