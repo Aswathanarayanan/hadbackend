@@ -1,5 +1,6 @@
 package com.example.hadbackend.controller;
 
+import java.io.FileNotFoundException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -88,8 +89,19 @@ public class RequestController {
     @Autowired
     MedicalData medicalData;
 
-    @Autowired
+//    @Autowired
+//    OPconsultation opConsultion;
     OPconsultation opConsultion;
+
+    {
+        try {
+            opConsultion = new OPconsultation();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+//    OPconsultation opConsultion =new OPconsultation();
 
     @Autowired
     EncryptionController encryptionController;

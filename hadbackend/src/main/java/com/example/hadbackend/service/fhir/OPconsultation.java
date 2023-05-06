@@ -182,7 +182,7 @@ public class OPconsultation {
 //
 //        URL Url = getClass().getClassLoader().getResource(resourceFolderName);
 //        String baseFilePath = Url.getPath();
-        String baseFilePath="src\\main\\java\\com\\example\\hadbackend\\fhirprofilesjson\\k";
+        String baseFilePath="/home/aswathanarayanan/HAD/definitions.json";
         File dir=new File(baseFilePath);
         FileFilter fileFilter=new WildcardFileFilter("*.json");
         File[] files = dir.listFiles(fileFilter);
