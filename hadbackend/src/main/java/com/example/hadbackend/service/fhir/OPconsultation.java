@@ -535,8 +535,6 @@ public class OPconsultation {
             bundleEntry1.setFullUrl("MedicationRequest/"+medicationRequest.getId());
             bundleEntry1.setResource(medicationRequest);
             lb.add(bundleEntry1);
-
-//            medicationRequest.setMedication().
         }
 
 

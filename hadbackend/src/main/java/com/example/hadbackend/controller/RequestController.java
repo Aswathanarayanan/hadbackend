@@ -58,6 +58,7 @@ import com.example.hadbackend.bean.request.HIPRequest;
 import com.example.hadbackend.bean.request.OnRequest;
 import com.example.hadbackend.bean.request.OnRequesthiRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.example.hadbackend.bean.carecontext.Medicalrecords;
@@ -201,7 +202,7 @@ public class RequestController {
         hiRequest.setDateRange(cmRequestDateRange);
 
         //Change URL (NGROK)
-        hiRequest.setDataPushUrl("https://9109-103-156-19-229.ngrok-free.app/gethipdata");
+        hiRequest.setDataPushUrl("https://f52c-103-156-19-229.ngrok-free.app/gethipdata");
 
         CmRequestKeyMaterial cmRequestKeyMaterial = new CmRequestKeyMaterial();
         cmRequestKeyMaterial.setCryptoAlg("ECDH");
@@ -534,9 +535,11 @@ public class RequestController {
                 DecryptionRequest decryptionRequest=new DecryptionRequest(hiuprivateKey,hiunonce,hippublickey,hipnonce,cur);
                 DecryptionResponse decryptionResponse= decryptionController.decrypt(decryptionRequest);
                 medicalrecords.add(decryptionResponse.getDecryptedData());
+                System.out.println("278273827  "+medicalrecords.get(0));
                
-                Gson gson = new Gson();
-                Bundle curbundle = gson.fromJson(decryptionResponse.getDecryptedData(), Bundle.class);
+                System.out.println(decryptionResponse.getDecryptedData());
+                // Gson gson = new Gson();
+                // Bundle curbundle = gson.fromJson(decryptionResponse.getDecryptedData(), Bundle.class);
                 // System.out.println(curbundle.getResourceType());
 //                curbundle.getEntry().get(5).getResource().getMeta().
 
@@ -547,25 +550,42 @@ public class RequestController {
 
                 //Save Transferred Data in DB
 
+                ObjectMapper objectMapper = new ObjectMapper();
+                // Bundle curbundle = objectMapper.readValue(decryptionResponse.getDecryptedData(), Bundle.class);
+
+                JsonNode curbundle = objectMapper.readTree(decryptionResponse.getDecryptedData());
+
+                JsonNode profileNode=curbundle.path("entry");
+                List<JsonNode> entrylist=new ArrayList<>();
+                for(JsonNode abc : profileNode){
+                    entrylist.add(abc);
+                }
+                JsonNode dataentry = entrylist.get(5).path("resource").path("meta").path("profile");
+                for (JsonNode node : dataentry){
+                    System.out.println(node.asText());
+                }
+
+                //System.out.println(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(1).toString());
+
                 TransferedData transferedData = new TransferedData();
                 List<String> curConsent = consentRepository.getConsentID(data.getTransactionId());
                 transferedData.setConsentID(curConsent.get(0));
 
                 List<String> abha = consentRepository.getAbhaID(data.getTransactionId());
                 transferedData.setAbhaid(abha.get(0));
-                transferedData.setInstruction(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(1).toString());
-                transferedData.setDosage(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(2).toString());
-                transferedData.setSymptoms(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(3).toString());
-                transferedData.setMedicine(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(4).toString());
-                transferedData.setPattern(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(5).toString());
-                transferedData.setTimings(curbundle.getEntry().get(5).getResource().getMeta().getProfile().get(6).toString());
+                transferedData.setInstruction(dataentry.get(1).asText());
+                transferedData.setDosage(dataentry.get(2).asText());
+                transferedData.setSymptoms(dataentry.get(3).asText());
+                transferedData.setMedicine(dataentry.get(4).asText());
+                transferedData.setPattern(dataentry.get(5).asText());
+                transferedData.setTimings(dataentry.get(6).asText());
 
 //                transferedData.setMedicine("Dolo");
 
                 //Add remaining
                 
-                String expDate = consentRepository.findExpirayDateByConsentId(curConsent.get(0));
-                transferedData.setExpirayDate(expDate);
+                List<String> expDate = consentRepository.getExpirayDateFromconsentId(curConsent.get(0));
+                transferedData.setExpirayDate(expDate.get(0));
 
                 transferedDataRepository.save(transferedData);
                 
@@ -577,7 +597,7 @@ public class RequestController {
                 respList.add(healthInfoNotifyStatusResponses);
 
         }
-        System.out.println(medicalrecords.get(0));
+        //System.out.println(medicalrecords.get(0));
 
         //Calling Health Data notify by HIU - DATA TRANSFERRED
 
